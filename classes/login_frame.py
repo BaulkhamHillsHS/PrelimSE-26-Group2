@@ -66,7 +66,49 @@ class LoginFrame(ctk.CTkFrame):
         subtitle.grid(row=2, column=0)
     
     def _build_login_panel(self):
-        pass
-    
+        login = ctk.CTkFrame(self, fg_color="transparent")
+        login.grid(row=0, column=1, sticky="nsew", padx=(10, 20), pady=20)
+        login.grid_columnconfigure(0, weight=1)
+
+        heading = ctk.CTkLabel(login, text="Welcome Back",
+                               font=("Segoe UI", 32, "bold"), 
+                               text_color=colours.TEXT_DARK)
+        heading.pack(pady=(80, 15))
+
+        description = ctk.CTkLabel(login, text="Sign in to continue streaming",
+                                   font=("Segoe UI", 16), text_color=colours.TEXT_DARK)
+        description.pack(pady=(0, 40))
+
+        self.username_entry = ctk.CTkEntry(login, width=350, height=45,
+                                           placeholder_text="Email Address",
+                                           border_width=0,fg_color=colours.BACKGROUND,
+                                           text_color=colours.TEXT_DARK)
+        self.username_entry.pack(pady=10)
+
+        self.password_entry = ctk.CTkEntry(login, width=350, height=45,
+                                           placeholder_text="Password", show="●",
+                                           border_width=0, fg_color=colours.BACKGROUND,
+                                           text_color=colours.TEXT_DARK)
+        self.password_entry.pack(pady=10)
+
+        remember_checkbox = ctk.CTkCheckBox(login, text="Remember me", 
+                                            text_color=colours.TEXT_DARK,
+                                            checkbox_width=20, checkbox_height=20,
+                                            fg_color=colours.DARK_ACCENT,
+                                            hover_color=colours.ACCENT)
+        remember_checkbox.pack(pady=(15, 20))
+
+        login_button = ctk.CTkButton(login, text="Login", width=350, height=50, 
+                                     corner_radius=12, fg_color=colours.DARK_ACCENT,
+                                     hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                                     font=("Segoe UI", 16, "bold"), command=self.login)
+        login_button.pack(pady=10)
+
     def login(self):
-        pass
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+
+        print(f"Username: {username}")
+        print(f"Password: {password}")
+        
+        # TODO: Implement actual authentication logic here
