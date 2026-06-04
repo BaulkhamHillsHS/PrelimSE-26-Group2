@@ -1,5 +1,9 @@
 import customtkinter as ctk
 from assets import colours
+import csv
+import os
+
+CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "accounts.csv")
 
 class LoginFrame(ctk.CTkFrame):
     def __init__(self, parent):
@@ -97,18 +101,32 @@ class LoginFrame(ctk.CTkFrame):
                                             fg_color=colours.DARK_ACCENT,
                                             hover_color=colours.ACCENT)
         remember_checkbox.pack(pady=(15, 20))
+        
+        self.error_label = ctk.CTkLabel(login, text="",
+                                        font=("Segoe UI", 13),
+                                        text_color=colours.ERROR)
+        self.error_label.pack(pady=(0, 5))
 
         login_button = ctk.CTkButton(login, text="Login", width=350, height=50, 
                                      corner_radius=12, fg_color=colours.DARK_ACCENT,
                                      hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
                                      font=("Segoe UI", 16, "bold"), command=self.login)
         login_button.pack(pady=10)
-
+    
     def login(self):
-        username = self.username_entry.get()
+        email = self.username_entry.get().strip()
         password = self.password_entry.get()
 
-        print(f"Username: {username}")
-        print(f"Password: {password}")
-        
-        # TODO: Implement actual authentication logic here
+        if not email or not password:
+            self.error_label.configure(text="Please enter email and password.")
+            return
+
+        with open(CSV_PATH, newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if row["email"] == email and row["password"] == password:
+                    # TODO: Transition to main app interface once implemented
+                    print("Successful login for:", email)
+                    return
+
+        self.error_label.configure(text="Invalid email or password.")
