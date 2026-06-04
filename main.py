@@ -2,7 +2,6 @@ import customtkinter as ctk
 from assets import colours
 from classes.login_frame import LoginFrame
 from classes.subscription_frame import SubscriptionFrame
-from classes.profile_selection import ProfileSelectionFrame
 
 
 class App(ctk.CTk):
