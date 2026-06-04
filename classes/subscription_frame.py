@@ -99,4 +99,23 @@ class SubscriptionFrame(ctk.CTkFrame):
             self._build_plan_card(panel, tier, i + 1)
     
     def _build_plan_card(self, parent, tier, col):
-        pass
+        info = TIER_INFO[tier]
+
+        card = ctk.CTkFrame(parent, fg_color=colours.SECONDARY, corner_radius=20)
+        card.grid(row=1, column=col - 1, sticky="nsew", padx=10, pady=(0, 20))
+        card.grid_columnconfigure(0, weight=1)
+        card.grid_rowconfigure(0, weight=1)
+
+        inner = ctk.CTkFrame(card, fg_color="transparent")
+        inner.grid(row=0, column=0, padx=25, pady=30)
+        inner.grid_columnconfigure(0, weight=1)
+
+        name = ctk.CTkLabel(inner, text=tier,
+                            font=("Segoe UI", 24, "bold"),
+                            text_color=colours.TEXT_DARK)
+        name.pack(pady=(10, 5))
+
+        price = ctk.CTkLabel(inner, text=info["price"] + "/mo",
+                             font=("Segoe UI", 18),
+                             text_color=colours.TEXT_DARK)
+        price.pack(pady=(0, 15))
