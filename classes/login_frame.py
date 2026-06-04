@@ -134,3 +134,6 @@ class LoginFrame(ctk.CTkFrame):
                     return
 
         self.error_label.configure(text="Invalid email or password.")
+    
+    
+    

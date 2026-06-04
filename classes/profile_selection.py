@@ -1,15 +1,17 @@
 import customtkinter as ctk
 from assets import colours
+import csv
+import os
+# Necessary Imports for the Profile Selection Frame
 
-class ProfileSelection(ctk.CTkFrame):
-    def __init__(self, parent):
-        super().__init__(parent)
 
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=1)
 
-        self._build_profile_panel()
+TIER_PROFILE_LIMITS = {
+    "Light Cream": 1,
+    "Whipped Cream": 2,
+    "Heavy Cream": 4,
+}
+# Limits for number of profile based on the subscription plan they have
+
+class ProfileSelectionFrame(ctk.CTkFrame):
     
-    def _build_profile_panel(self):
-        pass
-

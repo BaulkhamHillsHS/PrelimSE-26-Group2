@@ -2,6 +2,8 @@ import customtkinter as ctk
 from assets import colours
 from classes.login_frame import LoginFrame
 from classes.subscription_frame import SubscriptionFrame
+from classes.profile_selection import ProfileSelectionFrame
+
 
 class App(ctk.CTk):
 
@@ -31,6 +33,7 @@ class App(ctk.CTk):
         self.current_frame.destroy()
         self.current_frame = SubscriptionFrame(self, username)
         self.current_frame.grid(row=0, column=0, sticky="nsew")
+         
         
 if __name__ == "__main__":
     app = App()
