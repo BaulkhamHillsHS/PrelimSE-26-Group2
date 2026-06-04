@@ -6,8 +6,10 @@ import os
 CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "accounts.csv")
 
 class LoginFrame(ctk.CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, on_success=None):
         super().__init__(parent)
+        
+        self.on_success = on_success
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -125,8 +127,10 @@ class LoginFrame(ctk.CTkFrame):
             reader = csv.DictReader(f)
             for row in reader:
                 if row["email"] == email and row["password"] == password:
-                    # TODO: Transition to main app interface once implemented
-                    print("Successful login for:", email)
+                    if self.on_success:
+                        self.on_success(row["username"]) 
+                        # For testing purposes, switching to subscription page
+                        # TODO: Transition to main app interface once implemented
                     return
 
         self.error_label.configure(text="Invalid email or password.")
