@@ -84,4 +84,19 @@ class SubscriptionFrame(ctk.CTkFrame):
             lbl.grid(row=3 + i, column=0, pady=4)
     
     def _build_plan_selection_panel(self):
+        panel = ctk.CTkFrame(self, fg_color=colours.PRIMARY, corner_radius=20)
+        panel.grid(row=0, column=1, sticky="nsew", padx=(10, 20), pady=20)
+        panel.grid_columnconfigure((0, 1, 2), weight=1)
+        panel.grid_rowconfigure(0, weight=0)
+        panel.grid_rowconfigure(1, weight=1)
+
+        header = ctk.CTkLabel(panel, text="Available Plans",
+                              font=("Segoe UI", 28, "bold"),
+                              text_color=colours.TEXT_DARK)
+        header.grid(row=0, column=0, columnspan=3, pady=(20, 30))
+
+        for i, tier in enumerate(TIERS):
+            self._build_plan_card(panel, tier, i + 1)
+    
+    def _build_plan_card(self, parent, tier, col):
         pass
