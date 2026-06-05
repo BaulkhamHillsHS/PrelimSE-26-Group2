@@ -4,7 +4,7 @@ import csv
 import os
 # Necessary Imports for the Profile Selection Frame
 
-
+CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "accounts.csv")
 
 TIER_PROFILE_LIMITS = {
     "Light Cream": 1,
@@ -35,3 +35,25 @@ class ProfileSelectionFrame(ctk.CTkFrame):
                     return row
         return None
         
+    def _build_header(self):
+        header = ctk.CTkFrame(self, fg_color=colours.SECONDARY, corner_radius=20)
+        header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
+        header.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(header, text="StreamCream",
+                     font=("Segoe UI", 28, "bold"),
+                     text_color=colours.TEXT_DARK).grid(row=0, column=0, pady=(20, 4))
+ 
+        ctk.CTkLabel(header, text="Who's watching?",
+                     font=("Segoe UI", 16),
+                     text_color=colours.TEXT_DARK).grid(row=1, column=0, pady=(0, 20))
+ # Function built to create the header of the profile selection frame
+ 
+    def _build_profiles_panel(self):
+        panel = ctk.CTkFrame(self, fg_color=colours.PRIMARY, corner_radius=20)
+        panel.grid(row=1, column=0, sticky="nsew", padx=20, pady=(0, 20))
+        panel.grid_columnconfigure(0, weight=1)
+        panel.grid_rowconfigure(0, weight=1)
+        panel.grid_rowconfigure(1, weight=0)
+        
+ 
