@@ -100,6 +100,7 @@ class SubscriptionFrame(ctk.CTkFrame):
     
     def _build_plan_card(self, parent, tier, col):
         info = TIER_INFO[tier]
+        current_tier = self.user_data["tier"]
 
         card = ctk.CTkFrame(parent, fg_color=colours.SECONDARY, corner_radius=20)
         card.grid(row=1, column=col - 1, sticky="nsew", padx=10, pady=(0, 20))
@@ -119,3 +120,39 @@ class SubscriptionFrame(ctk.CTkFrame):
                              font=("Segoe UI", 18),
                              text_color=colours.TEXT_DARK)
         price.pack(pady=(0, 15))
+        
+        quality = ctk.CTkLabel(inner, text=info["quality"],
+                               font=("Segoe UI", 14),
+                               text_color=colours.TEXT_DARK)
+        quality.pack(pady=(0, 15))
+        
+        if tier == current_tier:
+            btn = ctk.CTkButton(inner, text="Current Plan",
+                                state="disabled",
+                                fg_color=colours.DARK_ACCENT,
+                                font=("Segoe UI", 14, "bold"))
+            btn.pack(pady=(10, 0))
+        else:
+            current_idx = TIERS.index(current_tier)
+            target_idx = TIERS.index(tier)
+            if target_idx > current_idx:
+                text = "Upgrade"
+                color = colours.ACCENT
+            else:
+                text = "Downgrade"
+                color = colours.DARK_ACCENT
+
+            btn = ctk.CTkButton(inner, text=text,
+                                fg_color=color,
+                                font=("Segoe UI", 14, "bold"),
+                                command=lambda t=tier: self._change_plan(t))
+            btn.pack(pady=(10, 0))
+        
+    def _change_plan(self, new_tier):
+        self.user_data["tier"] = new_tier
+        self.user_data["profiles"] = str(TIER_INFO[new_tier]["profiles"])
+        self._save_user_data()
+        for widget in self.winfo_children():
+            widget.destroy()
+        self._build_current_plan_panel()
+        self._build_plan_selection_panel()
