@@ -1,3 +1,4 @@
+# Theme colours used across the app UI
 BACKGROUND = "#f7e8ca"
 PRIMARY = "#f2d2a1"
 SECONDARY = "#e2b879"

@@ -5,11 +5,13 @@ import os
 
 CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "accounts.csv")
 
+# Login screen frame with username/password and CSV authentication
 class LoginFrame(ctk.CTkFrame):
     def __init__(self, parent, on_success=None):
         super().__init__(parent)
         
         self.on_success = on_success
+        # Store callback function to call on successful login
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -19,6 +21,7 @@ class LoginFrame(ctk.CTkFrame):
         self._build_login_panel()
     
     def _build_branding_panel(self):
+        # Branding panel frame on the left side with logo and app name
         branding = ctk.CTkFrame(
             self,
             fg_color=colours.SECONDARY,
@@ -72,6 +75,7 @@ class LoginFrame(ctk.CTkFrame):
         subtitle.grid(row=2, column=0)
     
     def _build_login_panel(self):
+        # Login form panel on the right side with entries and login button
         login = ctk.CTkFrame(self, fg_color="transparent")
         login.grid(row=0, column=1, sticky="nsew", padx=(10, 20), pady=20)
         login.grid_columnconfigure(0, weight=1)
@@ -90,13 +94,16 @@ class LoginFrame(ctk.CTkFrame):
                                            border_width=0,fg_color=colours.BACKGROUND,
                                            text_color=colours.TEXT_DARK)
         self.username_entry.pack(pady=10)
+        self.username_entry.bind("<Return>", lambda e: self.login()) # Allow pressing Enter to trigger login
 
         self.password_entry = ctk.CTkEntry(login, width=350, height=45,
                                            placeholder_text="Password", show="●",
                                            border_width=0, fg_color=colours.BACKGROUND,
                                            text_color=colours.TEXT_DARK)
         self.password_entry.pack(pady=10)
+        self.password_entry.bind("<Return>", lambda e: self.login()) # Allow pressing Enter to trigger login
 
+        # TODO: Implement remember me functionality
         remember_checkbox = ctk.CTkCheckBox(login, text="Remember me", 
                                             text_color=colours.TEXT_DARK,
                                             checkbox_width=20, checkbox_height=20,
@@ -116,24 +123,22 @@ class LoginFrame(ctk.CTkFrame):
         login_button.pack(pady=10)
     
     def login(self):
+        # Get entered email and password
         email = self.username_entry.get().strip()
         password = self.password_entry.get()
 
         if not email or not password:
             self.error_label.configure(text="Please enter email and password.")
             return
-
+        
+        # Check credentials against CSV file
         with open(CSV_PATH, newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 if row["email"] == email and row["password"] == password:
                     if self.on_success:
                         self.on_success(row["username"]) 
-                        # For testing purposes, switching to subscription page
-                        # TODO: Transition to main app interface once implemented
                     return
 
         self.error_label.configure(text="Invalid email or password.")
-    
-    
-    
+        
