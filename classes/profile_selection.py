@@ -75,3 +75,31 @@ class ProfileSelectionFrame(ctk.CTkFrame):
                       hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
                       font=("Segoe UI", 14, "bold"),
                       command=self._sign_out).grid(row=1, column=0, pady=(0, 20))
+    
+    def _build_profile_card(self, parent, name, index):
+        card = ctk.CTkFrame(parent, width=140, height=180,
+                            fg_color=colours.SECONDARY, corner_radius=16)
+        card.grid(row=0, column=index, padx=20)
+        card.grid_propagate(False)
+        card.grid_columnconfigure(0, weight=1)
+ 
+        avatar = ctk.CTkFrame(card, width=80, height=80,
+                              corner_radius=40, fg_color=colours.DARK_ACCENT)
+        avatar.grid(row=0, column=0, pady=(25, 8))
+        avatar.grid_propagate(False)
+ 
+        ctk.CTkLabel(avatar, text=name[0],
+                     font=("Segoe UI", 28, "bold"),
+                     text_color=colours.TEXT_LIGHT).place(relx=0.5, rely=0.5, anchor="center")
+ 
+        ctk.CTkLabel(card, text=name,
+                     font=("Segoe UI", 13, "bold"),
+                     text_color=colours.TEXT_DARK).grid(row=1, column=0, pady=(0, 20))
+ 
+        for widget in card.winfo_children():
+            widget.bind("<Button-1>", lambda e, n=name: self._select_profile(n))
+            widget.bind("<Enter>", lambda e, c=card: c.configure(fg_color=colours.ACCENT))
+            widget.bind("<Leave>", lambda e, c=card: c.configure(fg_color=colours.SECONDARY))
+        card.bind("<Button-1>", lambda e, n=name: self._select_profile(n))
+        card.bind("<Enter>", lambda e, c=card: c.configure(fg_color=colours.ACCENT))
+        card.bind("<Leave>", lambda e, c=card: c.configure(fg_color=colours.SECONDARY))
