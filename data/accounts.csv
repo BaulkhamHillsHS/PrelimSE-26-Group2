@@ -1,11 +1,11 @@
-    username,email,password,tier,profiles,payment
-    MrDunne,ryan.dunne9@det.nsw.edu.au,Baulko11!!,Heavy Cream,2,Visa-****-1234
-    hrizmi,habeb.rizmi@gmail.com,habebpw,Whipped Cream,2,Mastercard-****-5678
-    bobsmith,bob.smith@email.com,Pass456!,Light Cream,1,Visa-****-9012
-    alicew,alice.wong@email.com,Pass789!,Heavy Cream,4,Amex-****-3456
-    charlieb,charlie.brown@email.com,PassABC!,Light Cream,1,Visa-****-7890
-    dianap,diana.prince@email.com,PassDEF!,Whipped Cream,3,Mastercard-****-2345
-    frankc,frank.castle@email.com,PassGHI!,Heavy Cream,4,Visa-****-6789
-    graceh,grace.hopper@email.com,PassJKL!,Whipped Cream,2,Amex-****-0123
-    henryj,henry.jones@email.com,PassMNO!,Light Cream,1,Mastercard-****-4567
-    ssundaresan,sivaram.sundaresan@email.com,PassPQR!p,Heavy Cream,3,Visa-****-8901
+username,email,password,tier,profiles,payment
+MrDunne,ryan.dunne9@det.nsw.edu.au,Baulko11!!,Heavy Cream,2,Visa-****-1234
+hrizmi,habeb.rizmi@gmail.com,habebpw,Whipped Cream,2,Mastercard-****-5678
+bobsmith,bob.smith@email.com,Pass456!,Light Cream,1,Visa-****-9012
+alicew,alice.wong@email.com,Pass789!,Heavy Cream,4,Amex-****-3456
+charlieb,charlie.brown@email.com,PassABC!,Light Cream,1,Visa-****-7890
+dianap,diana.prince@email.com,PassDEF!,Whipped Cream,3,Mastercard-****-2345
+frankc,frank.castle@email.com,PassGHI!,Heavy Cream,4,Visa-****-6789
+graceh,grace.hopper@email.com,PassJKL!,Whipped Cream,2,Amex-****-0123
+henryj,henry.jones@email.com,PassMNO!,Light Cream,1,Mastercard-****-4567
+ssundaresan,sivaram.sundaresan@email.com,PassPQR!p,Heavy Cream,3,Visa-****-8901
