@@ -103,3 +103,23 @@ class ProfileSelectionFrame(ctk.CTkFrame):
         card.bind("<Button-1>", lambda e, n=name: self._select_profile(n))
         card.bind("<Enter>", lambda e, c=card: c.configure(fg_color=colours.ACCENT))
         card.bind("<Leave>", lambda e, c=card: c.configure(fg_color=colours.SECONDARY))
+        
+    def _build_add_card(self, parent, index):
+        card = ctk.CTkFrame(parent, width=140, height=180,
+                            fg_color=colours.SECONDARY, corner_radius=16,
+                            border_width=2, border_color=colours.DARK_ACCENT)
+        card.grid(row=0, column=index, padx=20)
+        card.grid_propagate(False)
+        card.grid_columnconfigure(0, weight=1)
+ 
+        ctk.CTkLabel(card, text="+",
+                     font=("Segoe UI", 48, "bold"),
+                     text_color=colours.DARK_ACCENT).grid(row=0, column=0, pady=(25, 4))
+ 
+        ctk.CTkLabel(card, text="Add Profile",
+                     font=("Segoe UI", 13),
+                     text_color=colours.TEXT_DARK).grid(row=1, column=0)
+ 
+        card.bind("<Button-1>", lambda e: self._add_profile_dialog())
+        card.bind("<Enter>", lambda e: card.configure(fg_color=colours.ACCENT))
+        card.bind("<Leave>", lambda e: card.configure(fg_color=colours.SECONDARY))
