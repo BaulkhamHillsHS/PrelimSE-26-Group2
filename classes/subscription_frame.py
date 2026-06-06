@@ -51,6 +51,7 @@ class SubscriptionFrame(ctk.CTkFrame):
             writer.writerows(rows)
     
     def _build_current_plan_panel(self):
+        # Panel (left) to show the user's current subscription details
         panel = ctk.CTkFrame(self, fg_color=colours.SECONDARY, corner_radius=20)
         panel.grid(row=0, column=0, sticky="nsew", padx=(20, 10), pady=20)
         panel.grid_columnconfigure(0, weight=1)
@@ -71,7 +72,8 @@ class SubscriptionFrame(ctk.CTkFrame):
 
         divider = ctk.CTkFrame(inner, height=2, fg_color=colours.DARK_ACCENT)
         divider.grid(row=2, column=0, sticky="ew", padx=40, pady=10)
-
+        
+        # Display other subscription details (profiles, payment method, email)
         details = [
             f"Profiles: {self.user_data['profiles']}",
             f"Payment: {self.user_data['payment']}",
@@ -84,6 +86,7 @@ class SubscriptionFrame(ctk.CTkFrame):
             lbl.grid(row=3 + i, column=0, pady=4)
     
     def _build_plan_selection_panel(self):
+        # Panel (right) to show the available subscription plans (plan cards) and allows the user to select a new one
         panel = ctk.CTkFrame(self, fg_color=colours.PRIMARY, corner_radius=20)
         panel.grid(row=0, column=1, sticky="nsew", padx=(10, 20), pady=20)
         panel.grid_columnconfigure((0, 1, 2), weight=1)
@@ -95,10 +98,12 @@ class SubscriptionFrame(ctk.CTkFrame):
                               text_color=colours.TEXT_DARK)
         header.grid(row=0, column=0, columnspan=3, pady=(20, 30))
 
+        # Create a card for each subscription tier
         for i, tier in enumerate(TIERS):
             self._build_plan_card(panel, tier, i + 1)
     
     def _build_plan_card(self, parent, tier, col):
+        # Helper function to create a subscription plan card with the given tier and place it in the given column
         info = TIER_INFO[tier]
 
         card = ctk.CTkFrame(parent, fg_color=colours.SECONDARY, corner_radius=20)
