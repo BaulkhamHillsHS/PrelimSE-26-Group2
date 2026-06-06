@@ -90,12 +90,14 @@ class LoginFrame(ctk.CTkFrame):
                                            border_width=0,fg_color=colours.BACKGROUND,
                                            text_color=colours.TEXT_DARK)
         self.username_entry.pack(pady=10)
+        self.username_entry.bind("<Return>", lambda e: self.login())
 
         self.password_entry = ctk.CTkEntry(login, width=350, height=45,
                                            placeholder_text="Password", show="●",
                                            border_width=0, fg_color=colours.BACKGROUND,
                                            text_color=colours.TEXT_DARK)
         self.password_entry.pack(pady=10)
+        self.password_entry.bind("<Return>", lambda e: self.login())
 
         remember_checkbox = ctk.CTkCheckBox(login, text="Remember me", 
                                             text_color=colours.TEXT_DARK,
