@@ -150,6 +150,7 @@ class LoginFrame(ctk.CTkFrame):
         if row is None or row["password"] != password:
             self.error_label.configure(text="Invalid email or password.")
             return
+        self._pending_row = row # Store user data for use during 2FA verification
         
         if SKIP_2FA:
             # Skip 2FA verification so we can test login without needing to set up Google Authenticator
@@ -157,16 +158,24 @@ class LoginFrame(ctk.CTkFrame):
                 self.on_success(email)
             return
         
-        self._show_totp_popup(row.get("totp_secret"), email)
+        existing_secret = row.get("totp_secret", "").strip()
+        if existing_secret:
+            self._pending_secret = existing_secret
+            self._is_new_user = False
+        else:
+            self._pending_secret = pyotp.random_base32() # Generate random secret if user doesn't have one yet
+            self._is_new_user = True
+        
+        self._show_totp_popup()
     
-    def _show_totp_popup(self, totp_secret, email):
+    def _show_totp_popup(self):
         self._totp_popup = ctk.CTkToplevel(self)
         self._totp_popup.title("Two-Factor Authentication")
         self._totp_popup.configure(fg_color=colours.SECONDARY)
         self._totp_popup.resizable(False, False)
         
         popup_width = 420
-        popup_height = 240 if totp_secret else 460 # If no 2FA set up yet, popup needs to be taller to show QR code and secret
+        popup_height = 460 if self._is_new_user else 240 # If no 2FA set up yet, popup needs to be taller to show QR code and secret
         screen_w = self._totp_popup.winfo_screenwidth()
         screen_h = self._totp_popup.winfo_screenheight()
         x = (screen_w - popup_width) // 2
@@ -187,10 +196,10 @@ class LoginFrame(ctk.CTkFrame):
                                text_color=colours.TEXT_DARK)
         heading.grid(row=0, column=0, pady=(0, 12))
         
-        totp = pyotp.TOTP(totp_secret) if totp_secret else pyotp.TOTP(pyotp.random_base32()) # Generate random secret if user doesn't have one yet
+        totp = pyotp.TOTP(self._pending_secret)
         
-        if not totp_secret: # No 2FA set up yet
-            uri = totp.provisioning_uri(email, issuer_name="StreamCream")
+        if self._is_new_user: # No 2FA set up yet
+            uri = totp.provisioning_uri(self._pending_row["email"], issuer_name="StreamCream")
             qr = qrcode.make(uri, box_size=5, border=2).convert("RGB")
             qr_buffer = BytesIO()
             qr.save(qr_buffer, format="PNG")
@@ -208,7 +217,7 @@ class LoginFrame(ctk.CTkFrame):
             qr_label.grid(row=2, column=0, pady=(0, 4))
 
             secret_label = ctk.CTkLabel(
-                main, text=f"Secret: {totp_secret}",
+                main, text=f"Secret: {self._pending_secret}",
                 font=("Segoe UI", 11, "bold"), text_color=colours.DARK_ACCENT
             )
             secret_label.grid(row=3, column=0, pady=(0, 8))
@@ -234,5 +243,27 @@ class LoginFrame(ctk.CTkFrame):
         entry.focus()
     
     def _verify_totp(self, entry, error_label):
-        pass # TODO: Implement TOTP verification, if successful call self.on_success callback and close popup
+        entered_code = entry.get().strip()
+        
+        if not entered_code.isdigit() or len(entered_code) != 6:
+            error_label.configure(text="Please enter a valid 6-digit code.")
+            return
+        
+        totp = pyotp.TOTP(self._pending_secret)
+        
+        if totp.verify(entered_code, valid_window=1): # Allow 30s window before or after
+            if self._is_new_user:
+                self._save_totp_secret(self._pending_row["email"], self._pending_secret)
+            self._close_popup()
+            if self.on_success:
+                self.on_success(self._pending_row["username"])
+        else:
+            error_label.configure(text="Invalid authenticator code. Try again.")
+    
+    def _close_popup(self):
+        self._totp_popup.grab_release()
+        self._totp_popup.destroy()
+    
+    def _save_totp_secret(self, email, totp_secret):
+        pass
             
