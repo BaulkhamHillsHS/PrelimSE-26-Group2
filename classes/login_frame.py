@@ -175,12 +175,12 @@ class LoginFrame(ctk.CTkFrame):
         self._totp_popup.resizable(False, False)
         
         popup_width = 420
-        popup_height = 460 if self._is_new_user else 240 # If no 2FA set up yet, popup needs to be taller to show QR code and secret
+        popup_height = 460 if self._is_new_user else 280 # If no 2FA set up yet, popup needs to be taller to show QR code and secret
         screen_w = self._totp_popup.winfo_screenwidth()
         screen_h = self._totp_popup.winfo_screenheight()
         x = (screen_w - popup_width) // 2
         y = (screen_h - popup_height) // 2
-        self._totp_popup.geometry(f"{popup_width}x{popup_height}+{x}+{y}")
+        self._totp_popup.geometry(f"{popup_width}x{popup_height}+{x}+{y}") # Center the popup on the screen
         
         # Popup must be transient and grab focus so user has to interact with it before returning to main window
         self._totp_popup.transient(self.winfo_toplevel())
@@ -221,23 +221,29 @@ class LoginFrame(ctk.CTkFrame):
                 font=("Segoe UI", 11, "bold"), text_color=colours.DARK_ACCENT
             )
             secret_label.grid(row=3, column=0, pady=(0, 8))
+            
+            entry_row = 4 # Code entry starts at row 4 for new users since we have extra instructions and QR code
         
         else:
-            pass # User already has 2FA set up, TODO: Show code entry without QR or secret display
+            returning_label = ctk.CTkLabel(main, text="Enter the 6-digit code from your authenticator app.",
+                                           font=("Segoe UI", 13), text_color=colours.TEXT_DARK, justify="center")
+            returning_label.grid(row=1, column=0, pady=(0, 8))
+            
+            entry_row = 2 # Code entry starts at row 2 for existing users since we only have one instruction label
 
         entry = ctk.CTkEntry(main, width=200, height=42, placeholder_text="000000", border_width=0,
                              fg_color=colours.BACKGROUND, text_color=colours.TEXT_DARK, font=("Segoe UI", 18, "bold"), 
                              justify="center")
-        entry.grid(row=4, column=0, pady=(0, 8))
+        entry.grid(row=entry_row, column=0, pady=(0, 8))
         
         error_label = ctk.CTkLabel(main, text="", font=("Segoe UI", 13), text_color=colours.ERROR)
-        error_label.grid(row=5, column=0, pady=(0, 4))
+        error_label.grid(row=entry_row + 1, column=0, pady=(0, 4))
         
         verify_btn = ctk.CTkButton(main, text="Verify Code", width=200, height=42,
                                    corner_radius=12, fg_color=colours.DARK_ACCENT,
                                    hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
                                    font=("Segoe UI", 14, "bold"), command=lambda: self._verify_totp(entry, error_label))
-        verify_btn.grid(row=6, column=0, pady=(0, 4))
+        verify_btn.grid(row=entry_row + 2, column=0, pady=(0, 4))
         
         entry.bind("<Return>", lambda e: self._verify_totp(entry, error_label))
         entry.focus()
@@ -264,6 +270,18 @@ class LoginFrame(ctk.CTkFrame):
         self._totp_popup.grab_release()
         self._totp_popup.destroy()
     
-    def _save_totp_secret(self, email, totp_secret):
-        pass
+    def _save_totp_secret(self, email, secret):
+        rows = []
+        with open(CSV_PATH, newline="") as f:
+            reader = csv.DictReader(f)
+            fieldnames = reader.fieldnames
+            for row in reader:
+                if row["email"] == email:
+                    row["totp_secret"] = secret
+                rows.append(row)
+
+        with open(CSV_PATH, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
             
