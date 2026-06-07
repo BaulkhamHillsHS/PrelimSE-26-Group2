@@ -2,8 +2,16 @@ import customtkinter as ctk
 from assets import colours
 import csv
 import os
+import pyotp
+import qrcode
+from io import BytesIO
+from PIL import Image
 
 CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "accounts.csv")
+
+# Google Authenticator (TOTP 2FA)
+# Testing flag: set to True to skip Google Authenticator verification entirely
+SKIP_2FA = False
 
 # Login screen frame with username/password and CSV authentication
 class LoginFrame(ctk.CTkFrame):
@@ -122,6 +130,13 @@ class LoginFrame(ctk.CTkFrame):
                                      font=("Segoe UI", 16, "bold"), command=self.login)
         login_button.pack(pady=10)
     
+    def _load_user_row(self, email):
+        with open(CSV_PATH, newline="") as f:
+            for row in csv.DictReader(f):
+                if row["email"] == email:
+                    return row
+        return None
+    
     def login(self):
         # Get entered email and password
         email = self.username_entry.get().strip()
@@ -130,15 +145,42 @@ class LoginFrame(ctk.CTkFrame):
         if not email or not password:
             self.error_label.configure(text="Please enter email and password.")
             return
-        
-        # Check credentials against CSV file
-        with open(CSV_PATH, newline="") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row["email"] == email and row["password"] == password:
-                    if self.on_success:
-                        self.on_success(row["username"]) 
-                    return
 
-        self.error_label.configure(text="Invalid email or password.")
+        row = self._load_user_row(email)
+        if row is None or row["password"] != password:
+            self.error_label.configure(text="Invalid email or password.")
+            return
+        
+        if SKIP_2FA:
+            # Skip 2FA verification so we can test login without needing to set up Google Authenticator
+            if self.on_success:
+                self.on_success(email)
+            return
+        
+        self._show_totp_popup(row.get("totp_secret"), email)
+    
+    def _show_totp_popup(self, totp_secret, email):
+        self._totp_popup = ctk.CTkToplevel(self)
+        self._totp_popup.title("Two-Factor Authentication")
+        self._totp_popup.configure(fg_color=colours.SECONDARY)
+        self._totp_popup.resizable(False, False)
+        
+        popup_width = 420
+        popup_height = 460 if self._is_new_user else 240
+        screen_w = self._totp_popup.winfo_screenwidth()
+        screen_h = self._totp_popup.winfo_screenheight()
+        x = (screen_w - popup_width) // 2
+        y = (screen_h - popup_height) // 2
+        self._totp_popup.geometry(f"{popup_width}x{popup_height}+{x}+{y}")
+        
+        main = ctk.CTkFrame(self._totp_popup, fg_color="transparent")
+        main.pack(expand=True, fill="both", padx=30, pady=25)
+        main.grid_columnconfigure(0, weight=1)
+
+        heading = ctk.CTkLabel(main, text="Two-Factor Authentication",
+                               font=("Segoe UI", 20, "bold"),
+                               text_color=colours.TEXT_DARK)
+        heading.grid(row=0, column=0, pady=(0, 12))
+        
+        # Authentication logic + GUI here
         
