@@ -166,7 +166,7 @@ class LoginFrame(ctk.CTkFrame):
         self._totp_popup.resizable(False, False)
         
         popup_width = 420
-        popup_height = 460 if self._is_new_user else 240
+        popup_height = 240 if totp_secret else 460 # If no 2FA set up yet, popup needs to be taller to show QR code and secret
         screen_w = self._totp_popup.winfo_screenwidth()
         screen_h = self._totp_popup.winfo_screenheight()
         x = (screen_w - popup_width) // 2
@@ -182,5 +182,22 @@ class LoginFrame(ctk.CTkFrame):
                                text_color=colours.TEXT_DARK)
         heading.grid(row=0, column=0, pady=(0, 12))
         
-        # Authentication logic + GUI here
+        totp = pyotp.TOTP(totp_secret) if totp_secret else pyotp.TOTP(pyotp.random_base32()) # Generate random secret if user doesn't have one yet
         
+        if not totp_secret: # No 2FA set up yet
+            uri = totp.provisioning_uri(email, issuer_name="StreamCream")
+            qr = qrcode.make(uri, box_size=5, border=2).convert("RGB")
+            qr_buffer = BytesIO()
+            qr.save(qr_buffer, format="PNG")
+            qr_buffer.seek(0)
+            qr_ctk_image = ctk.CTkImage(Image.open(qr_buffer), size=(140, 140))
+            
+            instructions = ctk.CTkLabel(main,
+                                        text="Scan this QR code with Google Authenticator,\nthen enter the 6-digit code below.",
+                                        font=("Segoe UI", 13), text_color=colours.TEXT_DARK,
+                                        justify="center")
+            instructions.grid(row=1, column=0, pady=(0, 8))
+            
+            qr_label = ctk.CTkLabel(main, text="")
+            qr_label.configure(image=qr_ctk_image, text="")
+            qr_label.grid(row=2, column=0, pady=(0, 4))
