@@ -173,6 +173,11 @@ class LoginFrame(ctk.CTkFrame):
         y = (screen_h - popup_height) // 2
         self._totp_popup.geometry(f"{popup_width}x{popup_height}+{x}+{y}")
         
+        # Popup must be transient and grab focus so user has to interact with it before returning to main window
+        self._totp_popup.transient(self.winfo_toplevel())
+        self._totp_popup.grab_set() # Block interaction with main window
+        self._totp_popup.focus()
+        
         main = ctk.CTkFrame(self._totp_popup, fg_color="transparent")
         main.pack(expand=True, fill="both", padx=30, pady=25)
         main.grid_columnconfigure(0, weight=1)
@@ -201,3 +206,33 @@ class LoginFrame(ctk.CTkFrame):
             qr_label = ctk.CTkLabel(main, text="")
             qr_label.configure(image=qr_ctk_image, text="")
             qr_label.grid(row=2, column=0, pady=(0, 4))
+
+            secret_label = ctk.CTkLabel(
+                main, text=f"Secret: {totp_secret}",
+                font=("Segoe UI", 11, "bold"), text_color=colours.DARK_ACCENT
+            )
+            secret_label.grid(row=3, column=0, pady=(0, 8))
+        
+        else:
+            pass # User already has 2FA set up, TODO: Show code entry without QR or secret display
+
+        entry = ctk.CTkEntry(main, width=200, height=42, placeholder_text="000000", border_width=0,
+                             fg_color=colours.BACKGROUND, text_color=colours.TEXT_DARK, font=("Segoe UI", 18, "bold"), 
+                             justify="center")
+        entry.grid(row=4, column=0, pady=(0, 8))
+        
+        error_label = ctk.CTkLabel(main, text="", font=("Segoe UI", 13), text_color=colours.ERROR)
+        error_label.grid(row=5, column=0, pady=(0, 4))
+        
+        verify_btn = ctk.CTkButton(main, text="Verify Code", width=200, height=42,
+                                   corner_radius=12, fg_color=colours.DARK_ACCENT,
+                                   hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                                   font=("Segoe UI", 14, "bold"), command=lambda: self._verify_totp(entry, error_label))
+        verify_btn.grid(row=6, column=0, pady=(0, 4))
+        
+        entry.bind("<Return>", lambda e: self._verify_totp(entry, error_label))
+        entry.focus()
+    
+    def _verify_totp(self, entry, error_label):
+        pass # TODO: Implement TOTP verification, if successful call self.on_success callback and close popup
+            
