@@ -10,7 +10,7 @@ from PIL import Image
 CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "accounts.csv")
 
 # Google Authenticator (TOTP 2FA)
-# Testing flag: set to True to skip Google Authenticator verification entirely
+# Testing flag: set to True to skip authenticator verification entirely
 SKIP_2FA = False
 
 # Login screen frame with username/password and CSV authentication
@@ -153,7 +153,7 @@ class LoginFrame(ctk.CTkFrame):
         self._pending_row = row # Store user data for use during 2FA verification
         
         if SKIP_2FA:
-            # Skip 2FA verification so we can test login without needing to set up Google Authenticator
+            # Skip 2FA verification so we can test login without needing to set up authenticator
             if self.on_success:
                 self.on_success(email)
             return
@@ -207,7 +207,7 @@ class LoginFrame(ctk.CTkFrame):
             qr_ctk_image = ctk.CTkImage(Image.open(qr_buffer), size=(140, 140))
             
             instructions = ctk.CTkLabel(main,
-                                        text="Scan this QR code with Google Authenticator,\nthen enter the 6-digit code below.",
+                                        text="Scan this QR code with your authenticator app,\nthen enter the 6-digit code below.",
                                         font=("Segoe UI", 13), text_color=colours.TEXT_DARK,
                                         justify="center")
             instructions.grid(row=1, column=0, pady=(0, 8))
