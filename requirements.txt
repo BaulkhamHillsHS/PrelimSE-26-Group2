@@ -1,0 +1,3 @@
+customtkinter
+pyotp
+qrcode[pil]
