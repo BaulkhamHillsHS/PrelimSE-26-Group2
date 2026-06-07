@@ -103,7 +103,6 @@ class ProfileSelectionFrame(ctk.CTkFrame):
         card.bind("<Button-1>", lambda e, n=name: self._select_profile(n))
         card.bind("<Enter>", lambda e, c=card: c.configure(fg_color=colours.ACCENT))
         card.bind("<Leave>", lambda e, c=card: c.configure(fg_color=colours.SECONDARY))
-        
     def _build_add_card(self, parent, index):
         card = ctk.CTkFrame(parent, width=140, height=180,
                             fg_color=colours.SECONDARY, corner_radius=16,
@@ -123,3 +122,24 @@ class ProfileSelectionFrame(ctk.CTkFrame):
         card.bind("<Button-1>", lambda e: self._add_profile_dialog())
         card.bind("<Enter>", lambda e: card.configure(fg_color=colours.ACCENT))
         card.bind("<Leave>", lambda e: card.configure(fg_color=colours.SECONDARY))
+    
+    def _select_profile(self, name):
+        if self.on_profile_selected:
+            self.on_profile_selected(self.username, name)
+ 
+    def _sign_out(self):
+        if self.on_sign_out:
+            self.on_sign_out()
+ 
+    def _save_user_data(self):
+        rows = []
+        with open(CSV_PATH, newline="") as f:
+            reader = csv.DictReader(f)
+            fieldnames = reader.fieldnames
+            for row in reader:
+                rows.append(self.user_data if row["username"] == self.username else row)
+        with open(CSV_PATH, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+#Have create multipe functioons each to handle their own parot of profile selection
