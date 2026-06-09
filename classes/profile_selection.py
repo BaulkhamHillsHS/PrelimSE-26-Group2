@@ -14,10 +14,11 @@ TIER_PROFILE_LIMITS = {
 # Limits for number of profile based on the subscription plan they have
 
 class ProfileSelectionFrame(ctk.CTkFrame):
-    def __init__(self, parent, email, on_profile_selected=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection
+    def __init__(self, parent, email, on_profile_selected=None, on_sign_out=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection
         super().__init__(parent)
         self.email = email
         self.on_profile_selected = on_profile_selected
+        self.on_sign_out = on_sign_out
         self.user_data = self._load_user_data()
         
         self.grid_columnconfigure(0, weight=1)
@@ -74,7 +75,7 @@ class ProfileSelectionFrame(ctk.CTkFrame):
                       corner_radius=12, fg_color=colours.DARK_ACCENT,
                       hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
                       font=("Segoe UI", 14, "bold"),
-                      command=self._sign_out).grid(row=1, column=0, pady=(0, 20))
+                      command=self.on_sign_out).grid(row=1, column=0, pady=(0, 20))
     
     def _build_profile_card(self, parent, name, index):
         card = ctk.CTkFrame(parent, width=140, height=180,
@@ -127,11 +128,7 @@ class ProfileSelectionFrame(ctk.CTkFrame):
     def _select_profile(self, name):
         if self.on_profile_selected:
             self.on_profile_selected(self.email, name)
- 
-    def _sign_out(self):
-        if self.on_sign_out:
-            self.on_sign_out()
- 
+  
     def _save_user_data(self):
         rows = []
         with open(CSV_PATH, newline="") as f:
