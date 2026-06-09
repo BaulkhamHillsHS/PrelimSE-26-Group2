@@ -32,10 +32,10 @@ class App(ctk.CTk):
         self.current_frame = LoginFrame(self, on_success=self._on_login_success)
         self.current_frame.grid(row=0, column=0, sticky="nsew")
     
-    def _on_login_success(self, username):
+    def _on_login_success(self, email):
         self.current_frame.destroy()
         # Temporarily just show the subscription frame after login, will show main page later
-        self.current_frame = SubscriptionFrame(self, username)
+        self.current_frame = SubscriptionFrame(self, email)
         self.current_frame.grid(row=0, column=0, sticky="nsew")
          
     
