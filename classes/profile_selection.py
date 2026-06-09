@@ -126,7 +126,7 @@ class ProfileSelectionFrame(ctk.CTkFrame):
     
     def _select_profile(self, name):
         if self.on_profile_selected:
-            self.on_profile_selected(self.username, name)
+            self.on_profile_selected(self.email, name)
  
     def _sign_out(self):
         if self.on_sign_out:
@@ -138,7 +138,7 @@ class ProfileSelectionFrame(ctk.CTkFrame):
             reader = csv.DictReader(f)
             fieldnames = reader.fieldnames
             for row in reader:
-                rows.append(self.user_data if row["username"] == self.username else row)
+                rows.append(self.user_data if row["email"] == self.email else row)
         with open(CSV_PATH, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
