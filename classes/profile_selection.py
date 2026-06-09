@@ -141,3 +141,30 @@ class ProfileSelectionFrame(ctk.CTkFrame):
             writer.writeheader()
             writer.writerows(rows)
     # Have create multiple functions each to handle their own part of profile selection
+    
+    def _add_profile_dialog(self):
+        popup = ctk.CTkToplevel(self)
+        popup.title("Add Profile")
+        popup.configure(fg_color=colours.SECONDARY)
+        popup.resizable(False, False)
+        popup_width, popup_height = 340, 200
+        screen_w = popup.winfo_screenwidth()
+        screen_h = popup.winfo_screenheight()
+        popup.geometry(f"{popup_width}x{popup_height}+{(screen_w - popup_width)//2}+{(screen_h - popup_height)//2}")
+        popup.transient(self.winfo_toplevel())
+        popup.grab_set()
+        popup.focus()
+ 
+        main = ctk.CTkFrame(popup, fg_color="transparent")
+        main.pack(expand=True, fill="both", padx=30, pady=25)
+        main.grid_columnconfigure(0, weight=1)
+ 
+        ctk.CTkLabel(main, text="New Profile Name", font=("Segoe UI", 18, "bold"),
+                     text_color=colours.TEXT_DARK).grid(row=0, column=0, pady=(0, 12))
+ 
+        name_entry = ctk.CTkEntry(main, width=240, height=40, placeholder_text="e.g. Kids, Dad...",
+                                  border_width=0, fg_color=colours.BACKGROUND, text_color=colours.TEXT_DARK)
+        name_entry.grid(row=1, column=0, pady=(0, 8))
+ 
+        error_label = ctk.CTkLabel(main, text="", font=("Segoe UI", 12), text_color=colours.ERROR)
+        error_label.grid(row=2, column=0)
