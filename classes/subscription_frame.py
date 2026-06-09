@@ -14,9 +14,9 @@ TIER_INFO = {
 }
 
 class SubscriptionFrame(ctk.CTkFrame):
-    def __init__(self, parent, username):
+    def __init__(self, parent, email):
         super().__init__(parent)
-        self.username = username
+        self.email = email
         self.user_data = self._load_user_data()
 
         self.grid_columnconfigure(0, weight=1)
@@ -30,7 +30,7 @@ class SubscriptionFrame(ctk.CTkFrame):
         with open(CSV_PATH, newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                if row["username"] == self.username:
+                if row["email"] == self.email:
                     return row
         return None
     
@@ -40,7 +40,7 @@ class SubscriptionFrame(ctk.CTkFrame):
             reader = csv.DictReader(f)
             fieldnames = reader.fieldnames
             for row in reader:
-                if row["username"] == self.username:
+                if row["email"] == self.email:
                     rows.append(self.user_data)
                 else:
                     rows.append(row)

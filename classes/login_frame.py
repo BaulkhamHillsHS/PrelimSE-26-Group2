@@ -11,15 +11,18 @@ CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "acc
 
 # Google Authenticator (TOTP 2FA)
 # Testing flag: set to True to skip authenticator verification entirely
-SKIP_2FA = False
+SKIP_2FA = True
 
 # Login screen frame with username/password and CSV authentication
 class LoginFrame(ctk.CTkFrame):
     def __init__(self, parent, on_success=None):
         super().__init__(parent)
         
-        self.on_success = on_success
-        # Store callback function to call on successful login
+        self.on_success = on_success # Store callback function to call on successful login
+        self._pending_secret = None
+        self._pending_row = None
+        self._is_new_user = True
+        self._totp_popup = None
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -262,7 +265,7 @@ class LoginFrame(ctk.CTkFrame):
                 self._save_totp_secret(self._pending_row["email"], self._pending_secret)
             self._close_popup()
             if self.on_success:
-                self.on_success(self._pending_row["username"])
+                self.on_success(self._pending_row["email"])
         else:
             error_label.configure(text="Invalid authenticator code. Try again.")
     

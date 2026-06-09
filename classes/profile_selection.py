@@ -14,9 +14,9 @@ TIER_PROFILE_LIMITS = {
 # Limits for number of profile based on the subscription plan they have
 
 class ProfileSelectionFrame(ctk.CTkFrame):
-    def __init__(self, parent, username, on_profile_selected=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection
+    def __init__(self, parent, email, on_profile_selected=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection
         super().__init__(parent)
-        self.username = username
+        self.email = email
         self.on_profile_selected = on_profile_selected
         self.user_data = self._load_user_data()
         
@@ -31,7 +31,7 @@ class ProfileSelectionFrame(ctk.CTkFrame):
         with open(CSV_PATH, newline="") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                if row["username"] == self.username:
+                if row["email"] == self.email:
                     return row
         return None
         
