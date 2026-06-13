@@ -1,3 +1,5 @@
+from py_compile import main
+
 import customtkinter as ctk
 from assets import colours
 import csv
