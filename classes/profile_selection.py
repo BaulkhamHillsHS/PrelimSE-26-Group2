@@ -1,9 +1,11 @@
+from py_compile import main
+
 import customtkinter as ctk
 from assets import colours
 from classes.data_control import load_user_data, save_user_data, TIER_PROFILE_LIMITS
 
 class ProfileSelectionFrame(ctk.CTkFrame):
-    def __init__(self, parent, email, on_profile_selected=None, on_sign_out=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection
+    def __init__(self, parent, email, on_profile_selected=lambda e, n: None, on_sign_out=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection
         super().__init__(parent)
         self.email = email
         self.on_profile_selected = on_profile_selected
@@ -79,10 +81,10 @@ class ProfileSelectionFrame(ctk.CTkFrame):
                      text_color=colours.TEXT_DARK).grid(row=1, column=0, pady=(0, 20))
  
         for widget in card.winfo_children():
-            widget.bind("<Button-1>", lambda e, n=name: self._select_profile(n))
+            widget.bind("<Button-1>", lambda e, n=name: self.on_profile_selected(self.email, n))
             widget.bind("<Enter>", lambda e, c=card: c.configure(fg_color=colours.ACCENT))
             widget.bind("<Leave>", lambda e, c=card: c.configure(fg_color=colours.SECONDARY))
-        card.bind("<Button-1>", lambda e, n=name: self._select_profile(n))
+        card.bind("<Button-1>", lambda e, n=name: self.on_profile_selected(self.email, n))
         card.bind("<Enter>", lambda e, c=card: c.configure(fg_color=colours.ACCENT))
         card.bind("<Leave>", lambda e, c=card: c.configure(fg_color=colours.SECONDARY))
     
@@ -109,7 +111,13 @@ class ProfileSelectionFrame(ctk.CTkFrame):
     def _select_profile(self, name):
         if self.on_profile_selected:
             self.on_profile_selected(self.email, name)
-            
+    
+    def _refresh_profiles(self): # Delete and rebuild
+        for widget in self.winfo_children():
+            widget.destroy()
+        self._build_header()
+        self._build_profiles_panel()
+    
     def _add_profile_dialog(self):
         popup = ctk.CTkToplevel(self)
         popup.title("Add Profile")
@@ -132,7 +140,26 @@ class ProfileSelectionFrame(ctk.CTkFrame):
  
         name_entry = ctk.CTkEntry(main, width=240, height=40, placeholder_text="e.g. Kids, Dad...",
                                   border_width=0, fg_color=colours.BACKGROUND, text_color=colours.TEXT_DARK)
-        name_entry.grid(row=1, column=0, pady=(0, 8))
+        name_entry.grid(row=1, column=0, pady=(0, 0))
  
         error_label = ctk.CTkLabel(main, text="", font=("Segoe UI", 12), text_color=colours.ERROR)
         error_label.grid(row=2, column=0)
+        
+        def save(): # Doesn't really do anything since the profiles aren't actually stored anywhere yet
+            name = name_entry.get().strip()
+            if not name:
+                error_label.configure(text="Profile name cannot be empty")
+                return
+            error_label.configure(text="")
+            self.user_data["profiles"] = str(int(self.user_data["profiles"]) + 1)
+            self._save_user_data()
+            popup.destroy()
+            self._refresh_profiles()
+
+        ctk.CTkButton(main, text="Save", width=120, height=36,
+                      corner_radius=12, fg_color=colours.DARK_ACCENT,
+                      hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                      font=("Segoe UI", 14, "bold"),
+                      command=save).grid(row=3, column=0, pady=(4, 0))
+
+        name_entry.bind("<Return>", lambda e: save())
