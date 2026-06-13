@@ -115,13 +115,50 @@ class SubscriptionFrame(ctk.CTkFrame):
             btn = ctk.CTkButton(inner, text=text,
                                 fg_color=color,
                                 font=("Segoe UI", 14, "bold"),
-                                command=lambda t=tier: self._change_plan(t))
+                                command=lambda t=tier: self._show_payment_popup(t))
             btn.pack(pady=(10, 0))
+    
+    def _show_payment_popup(self, new_tier):
+        info = TIER_INFO[new_tier]
+
+        # Make payment confirmation popup
+        popup = ctk.CTkToplevel(self)
+        popup.title("Confirm Payment")
+        popup.configure(fg_color=colours.SECONDARY)
+        popup.resizable(False, False)
         
-    def _change_plan(self, new_tier):
+        # Center the popup on the screen and make it modal
+        popup_width = 400
+        popup_height = 320
+        screen_w = popup.winfo_screenwidth()
+        screen_h = popup.winfo_screenheight()
+        popup.geometry(f"{popup_width}x{popup_height}+{(screen_w - popup_width)//2}+{(screen_h - popup_height)//2}")
+        popup.transient(self.winfo_toplevel())
+        popup.grab_set()
+        popup.focus()
+        
+        main = ctk.CTkFrame(popup, fg_color="transparent")
+        main.pack(expand=True, fill="both", padx=30, pady=25)
+        main.grid_columnconfigure(0, weight=1)
+        
+        # TODO: Add more details to the payment popup
+        
+        pay_btn = ctk.CTkButton(main, text=f"Pay {info['price']}",
+                                width=200, height=42,
+                                corner_radius=12, fg_color=colours.DARK_ACCENT,
+                                hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                                font=("Segoe UI", 14, "bold"),
+                                command=lambda: self._process_payment(popup, new_tier))
+        pay_btn.grid(row=0, column=0, pady=(0, 4))
+    
+    def _process_payment(self, popup, new_tier):        
+        self.after(2000, lambda: self._payment_complete(popup, new_tier)) # Simulate payment processing delay
+        
+    def _payment_complete(self, popup, new_tier):
         self.user_data["tier"] = new_tier
         self.user_data["profiles"] = str(TIER_INFO[new_tier]["profiles"])
         save_user_data(self.user_data)
+        popup.destroy()
         for widget in self.winfo_children():
             widget.destroy()
         self._build_current_plan_panel()
