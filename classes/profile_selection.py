@@ -1,3 +1,5 @@
+from py_compile import main
+
 import customtkinter as ctk
 from assets import colours
 import csv
@@ -168,3 +170,24 @@ class ProfileSelectionFrame(ctk.CTkFrame):
  
         error_label = ctk.CTkLabel(main, text="", font=("Segoe UI", 12), text_color=colours.ERROR)
         error_label.grid(row=2, column=0)
+ 
+        def _confirm():
+            if not name_entry.get().strip():
+                error_label.configure(text="Please enter a name.")
+                return
+            self.user_data["profiles"] = str(int(self.user_data["profiles"]) + 1)
+            self._save_user_data()
+            popup.grab_release()
+            popup.destroy()
+            for w in self.winfo_children(): w.destroy()
+            self._build_header()
+            self._build_profiles_panel()
+ 
+        ctk.CTkButton(main, text="Add", width=200, height=40, corner_radius=12,
+                      fg_color=colours.DARK_ACCENT, hover_color=colours.ACCENT,
+                      text_color=colours.TEXT_LIGHT, font=("Segoe UI", 14, "bold"),
+                      command=_confirm).grid(row=3, column=0, pady=(8, 0))
+        name_entry.bind("<Return>", lambda e: _confirm())
+
+        
+        
