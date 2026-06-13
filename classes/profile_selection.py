@@ -1,17 +1,6 @@
 import customtkinter as ctk
 from assets import colours
-import csv
-import os
-# Necessary Imports for the Profile Selection Frame
-
-CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "accounts.csv")
-
-TIER_PROFILE_LIMITS = {
-    "Light Cream": 1,
-    "Whipped Cream": 2,
-    "Heavy Cream": 4,
-}
-# Limits for number of profile based on the subscription plan they have
+from classes.data_control import load_user_data, save_user_data, TIER_PROFILE_LIMITS
 
 class ProfileSelectionFrame(ctk.CTkFrame):
     def __init__(self, parent, email, on_profile_selected=None, on_sign_out=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection
@@ -19,7 +8,7 @@ class ProfileSelectionFrame(ctk.CTkFrame):
         self.email = email
         self.on_profile_selected = on_profile_selected
         self.on_sign_out = on_sign_out
-        self.user_data = self._load_user_data()
+        self.user_data = load_user_data(self.email)
         
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=0)
@@ -27,14 +16,6 @@ class ProfileSelectionFrame(ctk.CTkFrame):
  
         self._build_header()
         self._build_profiles_panel()
- 
-    def _load_user_data(self):
-        with open(CSV_PATH, newline="") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row["email"] == self.email:
-                    return row
-        return None
         
     def _build_header(self):
         header = ctk.CTkFrame(self, fg_color=colours.SECONDARY, corner_radius=20)
@@ -128,20 +109,7 @@ class ProfileSelectionFrame(ctk.CTkFrame):
     def _select_profile(self, name):
         if self.on_profile_selected:
             self.on_profile_selected(self.email, name)
-  
-    def _save_user_data(self):
-        rows = []
-        with open(CSV_PATH, newline="") as f:
-            reader = csv.DictReader(f)
-            fieldnames = reader.fieldnames
-            for row in reader:
-                rows.append(self.user_data if row["email"] == self.email else row)
-        with open(CSV_PATH, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(rows)
-    # Have create multiple functions each to handle their own part of profile selection
-    
+            
     def _add_profile_dialog(self):
         popup = ctk.CTkToplevel(self)
         popup.title("Add Profile")

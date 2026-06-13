@@ -1,17 +1,14 @@
 import customtkinter as ctk
 from assets import colours
-import csv
-import os
 import pyotp
 import qrcode
 from io import BytesIO
 from PIL import Image
+from classes.data_control import load_user_data, save_user_data, CSV_PATH
 
-CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "accounts.csv")
-
-# Google Authenticator (TOTP 2FA)
+# Authenticator (TOTP 2FA)
 # Testing flag: set to True to skip authenticator verification entirely
-SKIP_2FA = True
+SKIP_2FA = False
 
 # Login screen frame with username/password and CSV authentication
 class LoginFrame(ctk.CTkFrame):
@@ -133,13 +130,6 @@ class LoginFrame(ctk.CTkFrame):
                                      font=("Segoe UI", 16, "bold"), command=self.login)
         login_button.pack(pady=10)
     
-    def _load_user_row(self, email):
-        with open(CSV_PATH, newline="") as f:
-            for row in csv.DictReader(f):
-                if row["email"] == email:
-                    return row
-        return None
-    
     def login(self):
         # Get entered email and password
         email = self.username_entry.get().strip()
@@ -149,8 +139,9 @@ class LoginFrame(ctk.CTkFrame):
             self.error_label.configure(text="Please enter email and password.")
             return
 
-        row = self._load_user_row(email)
-        if row is None or row["password"] != password:
+        row = load_user_data(email)
+        print(row)
+        if row is None or row["password"] != password: # Email not found or password doesn't match
             self.error_label.configure(text="Invalid email or password.")
             return
         self._pending_row = row # Store user data for use during 2FA verification
@@ -262,7 +253,8 @@ class LoginFrame(ctk.CTkFrame):
         
         if totp.verify(entered_code, valid_window=1): # Allow 30s window before or after
             if self._is_new_user:
-                self._save_totp_secret(self._pending_row["email"], self._pending_secret)
+                self._pending_row["totp_secret"] = self._pending_secret
+                save_user_data(self._pending_row) # Save new secret to CSV for future logins
             self._close_popup()
             if self.on_success:
                 self.on_success(self._pending_row["email"])
@@ -272,19 +264,4 @@ class LoginFrame(ctk.CTkFrame):
     def _close_popup(self):
         self._totp_popup.grab_release()
         self._totp_popup.destroy()
-    
-    def _save_totp_secret(self, email, secret):
-        rows = []
-        with open(CSV_PATH, newline="") as f:
-            reader = csv.DictReader(f)
-            fieldnames = reader.fieldnames
-            for row in reader:
-                if row["email"] == email:
-                    row["totp_secret"] = secret
-                rows.append(row)
-
-        with open(CSV_PATH, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(rows)
             

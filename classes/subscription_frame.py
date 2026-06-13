@@ -1,23 +1,12 @@
 import customtkinter as ctk
 from assets import colours
-import csv
-import os
-
-CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "accounts.csv")
-
-TIERS = ["Light Cream", "Whipped Cream", "Heavy Cream"]
-
-TIER_INFO = {
-    "Light Cream": {"price": "$5.99", "profiles": 1, "quality": "720p"},
-    "Whipped Cream": {"price": "$9.99", "profiles": 2, "quality": "1080p"},
-    "Heavy Cream": {"price": "$14.99", "profiles": 4, "quality": "4K"},
-}
+from classes.data_control import load_user_data, save_user_data, TIER_INFO, TIERS
 
 class SubscriptionFrame(ctk.CTkFrame):
     def __init__(self, parent, email):
         super().__init__(parent)
         self.email = email
-        self.user_data = self._load_user_data()
+        self.user_data = load_user_data(self.email)
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -25,30 +14,6 @@ class SubscriptionFrame(ctk.CTkFrame):
 
         self._build_current_plan_panel()
         self._build_plan_selection_panel()
-    
-    def _load_user_data(self):
-        with open(CSV_PATH, newline="") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row["email"] == self.email:
-                    return row
-        return None
-    
-    def _save_user_data(self):
-        rows = []
-        with open(CSV_PATH, newline="") as f:
-            reader = csv.DictReader(f)
-            fieldnames = reader.fieldnames
-            for row in reader:
-                if row["email"] == self.email:
-                    rows.append(self.user_data)
-                else:
-                    rows.append(row)
-                    
-        with open(CSV_PATH, "w", newline="") as f:
-            writer = csv.DictWriter(f, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerows(rows)
     
     def _build_current_plan_panel(self):
         # Panel (left) to show the user's current subscription details
@@ -156,7 +121,7 @@ class SubscriptionFrame(ctk.CTkFrame):
     def _change_plan(self, new_tier):
         self.user_data["tier"] = new_tier
         self.user_data["profiles"] = str(TIER_INFO[new_tier]["profiles"])
-        self._save_user_data()
+        save_user_data(self.user_data)
         for widget in self.winfo_children():
             widget.destroy()
         self._build_current_plan_panel()
