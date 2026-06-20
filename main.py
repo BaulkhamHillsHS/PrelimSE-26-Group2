@@ -5,6 +5,7 @@ from classes.subscription_frame import SubscriptionFrame
 from classes.profile_selection import ProfileSelectionFrame
 from classes.main_menu import MainMenuFrame
 from classes.settings_frame import SettingsFrame
+from classes.playback_frame import PlaybackFrame
 
 # Main app entry point for StreamCream GUI
 # Starts with login
@@ -60,7 +61,8 @@ class App(ctk.CTk):
             self.current_frame.destroy()
         self.current_frame = MainMenuFrame(self, self._email, self._profile_name,
                                            on_sign_out=self._show_login,
-                                           on_settings=self._show_settings)
+                                           on_settings=self._show_settings,
+                                           on_play=self._show_playback)
         self.current_frame.grid(row=0, column=0, sticky="nsew")
     
     def _show_settings(self):
@@ -77,6 +79,15 @@ class App(ctk.CTk):
         if self.current_frame:
             self.current_frame.destroy()
         self.current_frame = SubscriptionFrame(self, self._email, on_back=self._show_main_menu)
+        self.current_frame.grid(row=0, column=0, sticky="nsew")
+    
+    def _show_playback(self, content):
+        if self.current_frame:
+            self.current_frame.destroy()
+        self.current_frame = PlaybackFrame(
+            self, content,
+            on_back=self._show_main_menu,
+        )
         self.current_frame.grid(row=0, column=0, sticky="nsew")
          
     

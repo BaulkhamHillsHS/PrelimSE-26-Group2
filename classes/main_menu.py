@@ -3,12 +3,13 @@ from assets import colours
 from data.content import CATEGORIES
 
 class MainMenuFrame(ctk.CTkFrame):
-    def __init__(self, parent, email, profile_name, on_sign_out=None, on_settings=None):
+    def __init__(self, parent, email, profile_name, on_sign_out=None, on_settings=None, on_play=None):
         super().__init__(parent)
         self.email = email
         self.profile_name = profile_name
         self.on_sign_out = on_sign_out
         self.on_settings = on_settings
+        self.on_play = on_play
  
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=0)
@@ -64,11 +65,11 @@ class MainMenuFrame(ctk.CTkFrame):
             scroll_row.grid(row=row_index, column=0, sticky="ew", padx=10, pady=(0, 5))
             row_index += 1
 
-            for col, (title, color) in enumerate(items):
-                self._build_poster_card(scroll_row, title, color, col)
+            for col, content in enumerate(items):
+                self._build_poster_card(scroll_row, content, col)
  
     
-    def _build_poster_card(self, parent, title, color, col):
+    def _build_poster_card(self, parent, content, col):
         card = ctk.CTkFrame(parent, width=180, height=230,
                             fg_color=colours.SECONDARY, corner_radius=14)
         card.grid(row=0, column=col, padx=10, pady=10)
@@ -76,7 +77,7 @@ class MainMenuFrame(ctk.CTkFrame):
         card.grid_columnconfigure(0, weight=1)
 
         poster = ctk.CTkFrame(card, width=160, height=170,
-                              corner_radius=10, fg_color=color)
+                              corner_radius=10, fg_color=content.get_color())
         poster.grid(row=0, column=0, padx=10, pady=(10, 8))
         poster.grid_propagate(False)
 
@@ -84,12 +85,21 @@ class MainMenuFrame(ctk.CTkFrame):
                      font=("Segoe UI", 36),
                      text_color=colours.TEXT_LIGHT).place(relx=0.5, rely=0.5, anchor="center")
 
-        ctk.CTkLabel(card, text=title,
+        ctk.CTkLabel(card, text=content.get_title(),
                      font=("Segoe UI", 13, "bold"),
                      text_color=colours.TEXT_DARK,
                      wraplength=160, justify="center").grid(
                          row=1, column=0, padx=10, pady=(0, 10))
 
         for widget in (card, poster):
+            widget.bind("<Button-1>", lambda e, c=content: self._on_card_click(c))
             widget.bind("<Enter>", lambda e, c=card: c.configure(fg_color=colours.ACCENT))
             widget.bind("<Leave>", lambda e, c=card: c.configure(fg_color=colours.SECONDARY))
+        card.bind("<Button-1>", lambda e, c=content: self._on_card_click(c))
+        card.bind("<Enter>", lambda e, c=card: c.configure(fg_color=colours.ACCENT))
+        card.bind("<Leave>", lambda e, c=card: c.configure(fg_color=colours.SECONDARY))
+    
+    def _on_card_click(self, content):
+        if self.on_play:
+            self.on_play(content)
+        
