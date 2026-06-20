@@ -3,6 +3,7 @@ from assets import colours
 from classes.login_frame import LoginFrame
 from classes.subscription_frame import SubscriptionFrame
 from classes.profile_selection import ProfileSelectionFrame
+from classes.main_menu import MainMenuFrame
 
 # Main app entry point for StreamCream GUI
 # Starts with login
@@ -35,8 +36,17 @@ class App(ctk.CTk):
     
     def _on_login_success(self, email):
         self.current_frame.destroy()
-        # Temporarily just show the subscription frame after login, will show main page later
-        self.current_frame = ProfileSelectionFrame(self, email, on_sign_out=self._show_login)
+        self.current_frame = ProfileSelectionFrame(self, email,
+                                                   on_profile_selected=self._on_profile_selected,
+                                                   on_sign_out=self._show_login)
+        self.current_frame.grid(row=0, column=0, sticky="nsew")
+    
+    def _on_profile_selected(self, email, profile_name):
+        self.current_frame.destroy()
+        self.current_frame = MainMenuFrame(
+            self, email, profile_name,
+            on_sign_out=self._show_login
+        )
         self.current_frame.grid(row=0, column=0, sticky="nsew")
          
     
