@@ -16,7 +16,7 @@ class MainMenuFrame(ctk.CTkFrame):
         self.grid_rowconfigure(1, weight=1)
  
         self._build_header()
-        self._build_browse_panel()
+        self.after(200, self._build_browse_panel) # Delay to avoid lag when switching to main menu
  
     def _build_header(self):
         # Top bar with app name, current profile, and sign out button
