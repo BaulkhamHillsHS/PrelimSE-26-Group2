@@ -1,15 +1,14 @@
-from py_compile import main
-
 import customtkinter as ctk
 from assets import colours
 from classes.data_control import load_user_data, save_user_data, TIER_PROFILE_LIMITS
 
 class ProfileSelectionFrame(ctk.CTkFrame):
-    def __init__(self, parent, email, on_profile_selected=lambda e, n: None, on_sign_out=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection
+    def __init__(self, parent, email, on_profile_selected=None, on_sign_out=None, on_back=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection
         super().__init__(parent)
         self.email = email
         self.on_profile_selected = on_profile_selected
         self.on_sign_out = on_sign_out
+        self.on_back = on_back
         self.user_data = load_user_data(self.email)
         
         self.grid_columnconfigure(0, weight=1)
@@ -23,6 +22,13 @@ class ProfileSelectionFrame(ctk.CTkFrame):
         header = ctk.CTkFrame(self, fg_color=colours.SECONDARY, corner_radius=20)
         header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
         header.grid_columnconfigure(0, weight=1)
+        
+        if self.on_back: # If there is a back function, add a back button to the header
+            ctk.CTkButton(header, text="< Back", width=90, height=32,
+                          corner_radius=10, fg_color=colours.DARK_ACCENT,
+                          hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                          font=("Segoe UI", 12, "bold"),
+                          command=self.on_back).grid(row=0, column=0, padx=(15, 10), pady=(12, 0), sticky="w")
 
         ctk.CTkLabel(header, text="StreamCream",
                      font=("Segoe UI", 28, "bold"),

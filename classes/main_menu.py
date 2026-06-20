@@ -1,26 +1,22 @@
 import customtkinter as ctk
 from assets import colours
- 
-# Hardcoded placeholder titles to let users browse on main menu
-TITLES = [
-    "The Last Voyage", "Crimson Tide", "Night Falls", "Golden Hour",
-    "Echoes of Tomorrow", "Silver Lining", "The Long Road", "Starlight",
-    "Hidden Depths", "Wildfire", "Paper Moon", "Open Skies",
-]
- 
+from data.content import CATEGORIES
+
 class MainMenuFrame(ctk.CTkFrame):
-    def __init__(self, parent, email, profile_name, on_sign_out=None):
+    def __init__(self, parent, email, profile_name, on_sign_out=None, on_settings=None, on_play=None):
         super().__init__(parent)
         self.email = email
         self.profile_name = profile_name
         self.on_sign_out = on_sign_out
+        self.on_settings = on_settings
+        self.on_play = on_play
  
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=1)
  
         self._build_header()
-        self._build_browse_panel()
+        self.after(200, self._build_browse_panel) # Delay to avoid lag when switching to main menu
  
     def _build_header(self):
         # Top bar with app name, current profile, and sign out button
@@ -37,53 +33,73 @@ class MainMenuFrame(ctk.CTkFrame):
         ctk.CTkLabel(header, text=self.profile_name,
                      font=("Segoe UI", 14, "bold"),
                      text_color=colours.TEXT_DARK).grid(row=0, column=1, padx=10, pady=15)
+        
+        ctk.CTkButton(header, text="Settings", width=100, height=36,
+                      corner_radius=10, fg_color=colours.DARK_ACCENT,
+                      hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                      font=("Segoe UI", 13, "bold"),
+                      command=self.on_settings).grid(row=0, column=2, padx=5, pady=15)
  
         ctk.CTkButton(header, text="Sign Out", width=110, height=36,
                       corner_radius=10, fg_color=colours.DARK_ACCENT,
                       hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
                       font=("Segoe UI", 13, "bold"),
-                      command=self.on_sign_out).grid(row=0, column=2, padx=(10, 20), pady=15)
+                      command=self.on_sign_out).grid(row=0, column=3, padx=(10, 20), pady=15)
+        
     def _build_browse_panel(self):
-        # Scrollable grid of placeholder posters
         panel = ctk.CTkScrollableFrame(self, fg_color=colours.PRIMARY, corner_radius=20)
         panel.grid(row=1, column=0, sticky="nsew", padx=20, pady=(0, 20))
- 
-        for col in range(4):
-            panel.grid_columnconfigure(col, weight=1)
- 
-        ctk.CTkLabel(panel, text="Browse",
-                     font=("Segoe UI", 22, "bold"),
-                     text_color=colours.TEXT_DARK).grid(row=0, column=0, columnspan=4,
-                                                         sticky="w", padx=10, pady=(15, 15))
- 
-        row = 1
-        col = 0
-        for title in TITLES:
-            self._build_poster_card(panel, title, row, col)
-            col += 1
-            if col == 4:
-                col = 0
-                row += 1
+        panel.grid_columnconfigure(0, weight=1)
+
+        row_index = 0
+        for category, items in CATEGORIES.items():
+            ctk.CTkLabel(panel, text=category,
+                         font=("Segoe UI", 20, "bold"),
+                         text_color=colours.TEXT_DARK).grid(
+                             row=row_index, column=0, sticky="w", padx=15, pady=(20, 5))
+            row_index += 1
+
+            scroll_row = ctk.CTkScrollableFrame(
+                panel, fg_color=colours.BACKGROUND,
+                corner_radius=12, orientation="horizontal", height=250)
+            scroll_row.grid(row=row_index, column=0, sticky="ew", padx=10, pady=(0, 5))
+            row_index += 1
+
+            for col, content in enumerate(items):
+                self._build_poster_card(scroll_row, content, col)
  
     
-    def _build_poster_card(self, parent, title, row, col):
-        # Individual placeholder poster card (no real image, just a coloured block)
-        card = ctk.CTkFrame(parent, width=180, height=240,
+    def _build_poster_card(self, parent, content, col):
+        card = ctk.CTkFrame(parent, width=180, height=230,
                             fg_color=colours.SECONDARY, corner_radius=14)
-        card.grid(row=row, column=col, padx=12, pady=12)
+        card.grid(row=0, column=col, padx=10, pady=10)
         card.grid_propagate(False)
         card.grid_columnconfigure(0, weight=1)
- 
+
         poster = ctk.CTkFrame(card, width=160, height=170,
-                              corner_radius=10, fg_color=colours.DARK_ACCENT)
+                              corner_radius=10, fg_color=content.get_color())
         poster.grid(row=0, column=0, padx=10, pady=(10, 8))
         poster.grid_propagate(False)
- 
-        ctk.CTkLabel(card, text=title,
+
+        ctk.CTkLabel(poster, text="🎬",
+                     font=("Segoe UI", 36),
+                     text_color=colours.TEXT_LIGHT).place(relx=0.5, rely=0.5, anchor="center")
+
+        ctk.CTkLabel(card, text=content.get_title(),
                      font=("Segoe UI", 13, "bold"),
                      text_color=colours.TEXT_DARK,
-                     wraplength=160, justify="center").grid(row=1, column=0, padx=10, pady=(0, 10))
- 
+                     wraplength=160, justify="center").grid(
+                         row=1, column=0, padx=10, pady=(0, 10))
+
         for widget in (card, poster):
+            widget.bind("<Button-1>", lambda e, c=content: self._on_card_click(c))
             widget.bind("<Enter>", lambda e, c=card: c.configure(fg_color=colours.ACCENT))
             widget.bind("<Leave>", lambda e, c=card: c.configure(fg_color=colours.SECONDARY))
+        card.bind("<Button-1>", lambda e, c=content: self._on_card_click(c))
+        card.bind("<Enter>", lambda e, c=card: c.configure(fg_color=colours.ACCENT))
+        card.bind("<Leave>", lambda e, c=card: c.configure(fg_color=colours.SECONDARY))
+    
+    def _on_card_click(self, content):
+        if self.on_play:
+            self.on_play(content)
+        

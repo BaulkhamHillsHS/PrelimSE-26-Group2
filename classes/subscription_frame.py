@@ -3,22 +3,42 @@ from assets import colours
 from classes.data_control import load_user_data, save_user_data, TIER_INFO, TIERS
 
 class SubscriptionFrame(ctk.CTkFrame):
-    def __init__(self, parent, email):
+    def __init__(self, parent, email, on_back=None):
         super().__init__(parent)
         self.email = email
+        self.on_back = on_back
         self.user_data = load_user_data(self.email)
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=0)
+        self.grid_rowconfigure(1, weight=1)
 
+        self._build_header()
         self._build_current_plan_panel()
         self._build_plan_selection_panel()
+    
+    def _build_header(self):
+        header = ctk.CTkFrame(self, fg_color=colours.SECONDARY, corner_radius=20)
+        header.grid(row=0, column=0, columnspan=2, sticky="ew", padx=20, pady=(20, 10))
+        header.grid_columnconfigure(0, weight=1)
+        header.grid_columnconfigure(1, weight=0)
+
+        if self.on_back:
+            ctk.CTkButton(header, text="< Back to Menu", width=140, height=36,
+                          corner_radius=10, fg_color=colours.DARK_ACCENT,
+                          hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                          font=("Segoe UI", 13, "bold"),
+                          command=self.on_back).grid(row=0, column=0, padx=(15, 10), pady=12, sticky="w")
+
+        ctk.CTkLabel(header, text="StreamCream",
+                     font=("Segoe UI", 20, "bold"),
+                     text_color=colours.TEXT_DARK).grid(row=0, column=1, padx=(10, 20), pady=12, sticky="e")
     
     def _build_current_plan_panel(self):
         # Panel (left) to show the user's current subscription details
         panel = ctk.CTkFrame(self, fg_color=colours.SECONDARY, corner_radius=20)
-        panel.grid(row=0, column=0, sticky="nsew", padx=(20, 10), pady=20)
+        panel.grid(row=1, column=0, sticky="nsew", padx=(20, 10), pady=(0, 20))
         panel.grid_columnconfigure(0, weight=1)
 
         inner = ctk.CTkFrame(panel, fg_color="transparent")
@@ -53,7 +73,7 @@ class SubscriptionFrame(ctk.CTkFrame):
     def _build_plan_selection_panel(self):
         # Panel (right) to show the available subscription plans (plan cards) and allows the user to select a new one
         panel = ctk.CTkFrame(self, fg_color=colours.PRIMARY, corner_radius=20)
-        panel.grid(row=0, column=1, sticky="nsew", padx=(10, 20), pady=20)
+        panel.grid(row=1, column=1, sticky="nsew", padx=(10, 20), pady=(0, 20))
         panel.grid_columnconfigure((0, 1, 2), weight=1)
         panel.grid_rowconfigure(0, weight=0)
         panel.grid_rowconfigure(1, weight=1)
