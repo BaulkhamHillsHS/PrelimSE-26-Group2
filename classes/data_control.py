@@ -2,6 +2,7 @@ import csv
 import os
 
 CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "accounts.csv")
+PROFILES_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "profiles.csv")
 
 TIERS = ["Light Cream", "Whipped Cream", "Heavy Cream"]
 
@@ -55,3 +56,17 @@ def save_totp_secret(email, secret):
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+
+def load_profiles(email):
+    profiles = []
+    with open(PROFILES_PATH, newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if row["email"] == email:
+                profiles.append(row["profile_name"])
+    return profiles
+
+def add_profile(email, profile_name):
+    with open(PROFILES_PATH, "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([email, profile_name])
