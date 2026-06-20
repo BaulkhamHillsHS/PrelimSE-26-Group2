@@ -8,7 +8,7 @@ from classes.data_control import load_user_data, save_user_data, CSV_PATH
 
 # Authenticator (TOTP 2FA)
 # Testing flag: set to True to skip authenticator verification entirely
-SKIP_2FA = True
+SKIP_2FA = False
 
 # Login screen frame with username/password and CSV authentication
 class LoginFrame(ctk.CTkFrame):
