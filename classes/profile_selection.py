@@ -1,5 +1,3 @@
-from py_compile import main
-
 import customtkinter as ctk
 from assets import colours
 from classes.data_control import load_user_data, save_user_data, TIER_PROFILE_LIMITS
