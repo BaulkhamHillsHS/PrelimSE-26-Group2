@@ -151,8 +151,63 @@ class SubscriptionFrame(ctk.CTkFrame):
                                 command=lambda: self._process_payment(popup, new_tier))
         pay_btn.grid(row=0, column=0, pady=(0, 4))
     
-    def _process_payment(self, popup, new_tier):        
-        self.after(2000, lambda: self._payment_complete(popup, new_tier)) # Simulate payment processing delay
+    def _show_payment_popup(self, new_tier):
+        info = TIER_INFO[new_tier]
+        current_tier = self.user_data["tier"]
+
+        popup = ctk.CTkToplevel(self)
+        popup.title("Confirm Payment")
+        popup.configure(fg_color=colours.SECONDARY)
+        popup.resizable(False, False)
+
+        popup_width = 400
+        popup_height = 320
+        screen_w = popup.winfo_screenwidth()
+        screen_h = popup.winfo_screenheight()
+        popup.geometry(f"{popup_width}x{popup_height}+{(screen_w - popup_width)//2}+{(screen_h - popup_height)//2}")
+        popup.transient(self.winfo_toplevel())
+        popup.grab_set()
+        popup.focus()
+
+        main = ctk.CTkFrame(popup, fg_color="transparent")
+        main.pack(expand=True, fill="both", padx=30, pady=25)
+        main.grid_columnconfigure(0, weight=1)
+
+        heading = ctk.CTkLabel(main, text="Confirm Plan Change",
+                               font=("Segoe UI", 20, "bold"),
+                               text_color=colours.TEXT_DARK)
+        heading.grid(row=0, column=0, pady=(0, 15))
+
+        details_text = (
+            f"Current: {current_tier}\n"
+            f"New: {new_tier}\n"
+            f"Price: {info['price']}/mo\n\n"
+            f"Card: {self.user_data['payment']}"
+        )
+        details = ctk.CTkLabel(main, text=details_text,
+                               font=("Segoe UI", 14),
+                               text_color=colours.TEXT_DARK,
+                               justify="center")
+        details.grid(row=1, column=0, pady=(0, 15))
+
+        status_label = ctk.CTkLabel(main, text="",
+                                    font=("Segoe UI", 13),
+                                    text_color=colours.DARK_ACCENT)
+        status_label.grid(row=2, column=0, pady=(0, 8))
+
+        pay_btn = ctk.CTkButton(main, text=f"Pay {info['price']}",
+                                width=200, height=42,
+                                corner_radius=12, fg_color=colours.DARK_ACCENT,
+                                hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                                font=("Segoe UI", 14, "bold"),
+                                command=lambda: self._process_payment(popup, pay_btn, status_label, new_tier))
+        pay_btn.grid(row=3, column=0, pady=(0, 4))
+
+    
+    def _process_payment(self, popup, pay_btn, status_label, new_tier):
+        pay_btn.configure(state="disabled", text="Processing...")
+        status_label.configure(text="Processing payment...")
+        self.after(1000, lambda: self._payment_complete(popup, new_tier))
         
     def _payment_complete(self, popup, new_tier):
         self.user_data["tier"] = new_tier
