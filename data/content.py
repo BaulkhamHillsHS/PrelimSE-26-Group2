@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 CATEGORIES = {
     "Trending Now": [
         ("The Last Voyage", "#8B0000"), ("Crimson Tide", "#1a5276"),
@@ -45,3 +47,71 @@ CATEGORIES = {
         ("True Stories", "#922b21"), ("Horizons", "#1b4f72"),
     ],
 }
+
+class Content(ABC):
+    def __init__(self, title, color, year, description, rating):
+        self._title = title
+        self._color = color
+        self._year = year
+        self._description = description
+        self._rating = rating
+
+    def get_title(self):
+        return self._title
+
+    def get_color(self):
+        return self._color
+
+    def get_year(self):
+        return self._year
+
+    def get_description(self):
+        return self._description
+
+    def get_rating(self):
+        return self._rating
+
+    @abstractmethod
+    def get_type_label(self):
+        pass
+
+    @abstractmethod
+    def get_info_lines(self):
+        pass
+
+    def __repr__(self):
+        return f"{self._title} ({self.get_type_label()}, {self._year})"
+
+
+class Movie(Content):
+    def __init__(self, title, color, year, description, rating, duration, director):
+        super().__init__(title, color, year, description, rating)
+        self._duration = duration
+        self._director = director
+
+    def get_type_label(self):
+        return "Movie"
+
+    def get_info_lines(self):
+        return [
+            f"Director: {self._director}",
+            f"Duration: {self._duration} min",
+            f"Rating: {self._rating}/10",
+        ]
+
+
+class TVShow(Content):
+    def __init__(self, title, color, year, description, rating, seasons, episodes_per_season):
+        super().__init__(title, color, year, description, rating)
+        self._seasons = seasons
+        self._episodes_per_season = episodes_per_season
+
+    def get_type_label(self):
+        return "TV Series"
+
+    def get_info_lines(self):
+        return [
+            f"Seasons: {self._seasons}",
+            f"Episodes: {self._seasons * self._episodes_per_season}",
+            f"Rating: {self._rating}/10",
+        ]
