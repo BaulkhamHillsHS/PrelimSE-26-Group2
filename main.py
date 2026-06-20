@@ -4,6 +4,7 @@ from classes.login_frame import LoginFrame
 from classes.subscription_frame import SubscriptionFrame
 from classes.profile_selection import ProfileSelectionFrame
 from classes.main_menu import MainMenuFrame
+from classes.settings_frame import SettingsFrame
 
 # Main app entry point for StreamCream GUI
 # Starts with login
@@ -22,6 +23,8 @@ class App(ctk.CTk):
         self.grid_columnconfigure(0, weight=1)
         
         self.current_frame = None
+        self._email = None
+        self._profile_name = None
         self._show_login()
         
         # Maximise window after short delay (doesn't work without delay for some reason)
@@ -35,18 +38,45 @@ class App(ctk.CTk):
         self.current_frame.grid(row=0, column=0, sticky="nsew")
     
     def _on_login_success(self, email):
-        self.current_frame.destroy()
-        self.current_frame = ProfileSelectionFrame(self, email,
+        self._email = email
+        self._show_profile_selection()
+    
+    def _show_profile_selection(self, on_back=None):
+        if self.current_frame:
+            self.current_frame.destroy()
+        self.current_frame = ProfileSelectionFrame(self, self._email,
                                                    on_profile_selected=self._on_profile_selected,
-                                                   on_sign_out=self._show_login)
+                                                   on_sign_out=self._show_login,
+                                                   on_back=on_back)
         self.current_frame.grid(row=0, column=0, sticky="nsew")
     
     def _on_profile_selected(self, email, profile_name):
-        self.current_frame.destroy()
-        self.current_frame = MainMenuFrame(
-            self, email, profile_name,
-            on_sign_out=self._show_login
-        )
+        self._email = email
+        self._profile_name = profile_name
+        self._show_main_menu()
+
+    def _show_main_menu(self):
+        if self.current_frame:
+            self.current_frame.destroy()
+        self.current_frame = MainMenuFrame(self, self._email, self._profile_name,
+                                           on_sign_out=self._show_login,
+                                           on_settings=self._show_settings)
+        self.current_frame.grid(row=0, column=0, sticky="nsew")
+    
+    def _show_settings(self):
+        if self.current_frame:
+            self.current_frame.destroy()
+        self.current_frame = SettingsFrame(self, self._email, self._profile_name,
+                                           on_back=self._show_main_menu,
+                                           on_subscription=self._show_subscription,
+                                           on_switch_profile=lambda: self._show_profile_selection(on_back=self._show_main_menu),
+                                           on_sign_out=self._show_login)
+        self.current_frame.grid(row=0, column=0, sticky="nsew")
+
+    def _show_subscription(self):
+        if self.current_frame:
+            self.current_frame.destroy()
+        self.current_frame = SubscriptionFrame(self, self._email, on_back=self._show_main_menu)
         self.current_frame.grid(row=0, column=0, sticky="nsew")
          
     

@@ -3,11 +3,12 @@ from assets import colours
 from data.content import CATEGORIES
 
 class MainMenuFrame(ctk.CTkFrame):
-    def __init__(self, parent, email, profile_name, on_sign_out=None):
+    def __init__(self, parent, email, profile_name, on_sign_out=None, on_settings=None):
         super().__init__(parent)
         self.email = email
         self.profile_name = profile_name
         self.on_sign_out = on_sign_out
+        self.on_settings = on_settings
  
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=0)
@@ -31,12 +32,18 @@ class MainMenuFrame(ctk.CTkFrame):
         ctk.CTkLabel(header, text=self.profile_name,
                      font=("Segoe UI", 14, "bold"),
                      text_color=colours.TEXT_DARK).grid(row=0, column=1, padx=10, pady=15)
+        
+        ctk.CTkButton(header, text="Settings", width=100, height=36,
+                      corner_radius=10, fg_color=colours.DARK_ACCENT,
+                      hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                      font=("Segoe UI", 13, "bold"),
+                      command=self.on_settings).grid(row=0, column=2, padx=5, pady=15)
  
         ctk.CTkButton(header, text="Sign Out", width=110, height=36,
                       corner_radius=10, fg_color=colours.DARK_ACCENT,
                       hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
                       font=("Segoe UI", 13, "bold"),
-                      command=self.on_sign_out).grid(row=0, column=2, padx=(10, 20), pady=15)
+                      command=self.on_sign_out).grid(row=0, column=3, padx=(10, 20), pady=15)
         
     def _build_browse_panel(self):
         panel = ctk.CTkScrollableFrame(self, fg_color=colours.PRIMARY, corner_radius=20)
