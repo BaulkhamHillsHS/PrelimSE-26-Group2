@@ -3,22 +3,42 @@ from assets import colours
 from classes.data_control import load_user_data, save_user_data, TIER_INFO, TIERS
 
 class SubscriptionFrame(ctk.CTkFrame):
-    def __init__(self, parent, email):
+    def __init__(self, parent, email, on_back=None):
         super().__init__(parent)
         self.email = email
+        self.on_back = on_back
         self.user_data = load_user_data(self.email)
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=0)
+        self.grid_rowconfigure(1, weight=1)
 
+        self._build_header()
         self._build_current_plan_panel()
         self._build_plan_selection_panel()
+    
+    def _build_header(self):
+        header = ctk.CTkFrame(self, fg_color=colours.SECONDARY, corner_radius=20)
+        header.grid(row=0, column=0, columnspan=2, sticky="ew", padx=20, pady=(20, 10))
+        header.grid_columnconfigure(0, weight=1)
+        header.grid_columnconfigure(1, weight=0)
+
+        if self.on_back:
+            ctk.CTkButton(header, text="< Back to Menu", width=140, height=36,
+                          corner_radius=10, fg_color=colours.DARK_ACCENT,
+                          hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                          font=("Segoe UI", 13, "bold"),
+                          command=self.on_back).grid(row=0, column=0, padx=(15, 10), pady=12, sticky="w")
+
+        ctk.CTkLabel(header, text="StreamCream",
+                     font=("Segoe UI", 20, "bold"),
+                     text_color=colours.TEXT_DARK).grid(row=0, column=1, padx=(10, 20), pady=12, sticky="e")
     
     def _build_current_plan_panel(self):
         # Panel (left) to show the user's current subscription details
         panel = ctk.CTkFrame(self, fg_color=colours.SECONDARY, corner_radius=20)
-        panel.grid(row=0, column=0, sticky="nsew", padx=(20, 10), pady=20)
+        panel.grid(row=1, column=0, sticky="nsew", padx=(20, 10), pady=(0, 20))
         panel.grid_columnconfigure(0, weight=1)
 
         inner = ctk.CTkFrame(panel, fg_color="transparent")
@@ -53,7 +73,7 @@ class SubscriptionFrame(ctk.CTkFrame):
     def _build_plan_selection_panel(self):
         # Panel (right) to show the available subscription plans (plan cards) and allows the user to select a new one
         panel = ctk.CTkFrame(self, fg_color=colours.PRIMARY, corner_radius=20)
-        panel.grid(row=0, column=1, sticky="nsew", padx=(10, 20), pady=20)
+        panel.grid(row=1, column=1, sticky="nsew", padx=(10, 20), pady=(0, 20))
         panel.grid_columnconfigure((0, 1, 2), weight=1)
         panel.grid_rowconfigure(0, weight=0)
         panel.grid_rowconfigure(1, weight=1)
@@ -151,8 +171,63 @@ class SubscriptionFrame(ctk.CTkFrame):
                                 command=lambda: self._process_payment(popup, new_tier))
         pay_btn.grid(row=0, column=0, pady=(0, 4))
     
-    def _process_payment(self, popup, new_tier):        
-        self.after(2000, lambda: self._payment_complete(popup, new_tier)) # Simulate payment processing delay
+    def _show_payment_popup(self, new_tier):
+        info = TIER_INFO[new_tier]
+        current_tier = self.user_data["tier"]
+
+        popup = ctk.CTkToplevel(self)
+        popup.title("Confirm Payment")
+        popup.configure(fg_color=colours.SECONDARY)
+        popup.resizable(False, False)
+
+        popup_width = 400
+        popup_height = 320
+        screen_w = popup.winfo_screenwidth()
+        screen_h = popup.winfo_screenheight()
+        popup.geometry(f"{popup_width}x{popup_height}+{(screen_w - popup_width)//2}+{(screen_h - popup_height)//2}")
+        popup.transient(self.winfo_toplevel())
+        popup.grab_set()
+        popup.focus()
+
+        main = ctk.CTkFrame(popup, fg_color="transparent")
+        main.pack(expand=True, fill="both", padx=30, pady=25)
+        main.grid_columnconfigure(0, weight=1)
+
+        heading = ctk.CTkLabel(main, text="Confirm Plan Change",
+                               font=("Segoe UI", 20, "bold"),
+                               text_color=colours.TEXT_DARK)
+        heading.grid(row=0, column=0, pady=(0, 15))
+
+        details_text = (
+            f"Current: {current_tier}\n"
+            f"New: {new_tier}\n"
+            f"Price: {info['price']}/mo\n\n"
+            f"Card: {self.user_data['payment']}"
+        )
+        details = ctk.CTkLabel(main, text=details_text,
+                               font=("Segoe UI", 14),
+                               text_color=colours.TEXT_DARK,
+                               justify="center")
+        details.grid(row=1, column=0, pady=(0, 15))
+
+        status_label = ctk.CTkLabel(main, text="",
+                                    font=("Segoe UI", 13),
+                                    text_color=colours.DARK_ACCENT)
+        status_label.grid(row=2, column=0, pady=(0, 8))
+
+        pay_btn = ctk.CTkButton(main, text=f"Pay {info['price']}",
+                                width=200, height=42,
+                                corner_radius=12, fg_color=colours.DARK_ACCENT,
+                                hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                                font=("Segoe UI", 14, "bold"),
+                                command=lambda: self._process_payment(popup, pay_btn, status_label, new_tier))
+        pay_btn.grid(row=3, column=0, pady=(0, 4))
+
+    
+    def _process_payment(self, popup, pay_btn, status_label, new_tier):
+        pay_btn.configure(state="disabled", text="Processing...")
+        status_label.configure(text="Processing payment...")
+        self.after(1000, lambda: self._payment_complete(popup, new_tier))
         
     def _payment_complete(self, popup, new_tier):
         self.user_data["tier"] = new_tier

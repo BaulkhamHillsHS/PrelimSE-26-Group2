@@ -1,15 +1,14 @@
-from py_compile import main
-
 import customtkinter as ctk
 from assets import colours
-from classes.data_control import load_user_data, save_user_data, TIER_PROFILE_LIMITS
+from classes.data_control import load_user_data, save_user_data, load_profiles, add_profile, TIER_PROFILE_LIMITS
 
 class ProfileSelectionFrame(ctk.CTkFrame):
-    def __init__(self, parent, email, on_profile_selected=lambda e, n: None, on_sign_out=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection
+    def __init__(self, parent, email, on_profile_selected=None, on_sign_out=None, on_back=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection
         super().__init__(parent)
         self.email = email
         self.on_profile_selected = on_profile_selected
         self.on_sign_out = on_sign_out
+        self.on_back = on_back
         self.user_data = load_user_data(self.email)
         
         self.grid_columnconfigure(0, weight=1)
@@ -23,6 +22,13 @@ class ProfileSelectionFrame(ctk.CTkFrame):
         header = ctk.CTkFrame(self, fg_color=colours.SECONDARY, corner_radius=20)
         header.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 10))
         header.grid_columnconfigure(0, weight=1)
+        
+        if self.on_back: # If there is a back function, add a back button to the header
+            ctk.CTkButton(header, text="< Back", width=90, height=32,
+                          corner_radius=10, fg_color=colours.DARK_ACCENT,
+                          hover_color=colours.ACCENT, text_color=colours.TEXT_LIGHT,
+                          font=("Segoe UI", 12, "bold"),
+                          command=self.on_back).grid(row=0, column=0, padx=(15, 10), pady=(12, 0), sticky="w")
 
         ctk.CTkLabel(header, text="StreamCream",
                      font=("Segoe UI", 28, "bold"),
@@ -43,15 +49,15 @@ class ProfileSelectionFrame(ctk.CTkFrame):
         # Profile cards container
         cards_frame = ctk.CTkFrame(panel, fg_color="transparent")
         cards_frame.grid(row=0, column=0, pady=30)
- 
-        num_profiles = int(self.user_data["profiles"])
-        for i in range(num_profiles):
-            self._build_profile_card(cards_frame, f"Profile {i + 1}", i)
- 
+        
+        self._profile_names = load_profiles(self.email)
+        for i, name in enumerate(self._profile_names):
+            self._build_profile_card(cards_frame, name, i)
+        
         # Add profile card if under tier limit
         limit = TIER_PROFILE_LIMITS.get(self.user_data["tier"], 1)
-        if num_profiles < limit:
-            self._build_add_card(cards_frame, num_profiles)
+        if len(self._profile_names) < limit:
+            self._build_add_card(cards_frame, len(self._profile_names))
  
         # Sign out button
         ctk.CTkButton(panel, text="Sign Out", width=160, height=40,
@@ -145,12 +151,16 @@ class ProfileSelectionFrame(ctk.CTkFrame):
         error_label = ctk.CTkLabel(main, text="", font=("Segoe UI", 12), text_color=colours.ERROR)
         error_label.grid(row=2, column=0)
         
-        def save(): # Doesn't really do anything since the profiles aren't actually stored anywhere yet
+        def save():
             name = name_entry.get().strip()
             if not name:
                 error_label.configure(text="Profile name cannot be empty")
                 return
+            if name in self._profile_names:
+                error_label.configure(text="Profile name already exists")
+                return
             error_label.configure(text="")
+            add_profile(self.email, name)
             self.user_data["profiles"] = str(int(self.user_data["profiles"]) + 1)
             save_user_data(self.user_data)
             popup.destroy()
