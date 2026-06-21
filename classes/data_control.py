@@ -2,9 +2,13 @@ import csv
 import os
 from data.content import CATEGORIES
 
+########### Data Directories ###########
+
 CSV_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "accounts.csv")
 PROFILES_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "profiles.csv")
 WATCHLIST_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "watchlist.csv")
+
+########### Constants ###########
 
 WATCHLIST_FIELDNAMES = ["email", "profile_name", "title", "type_label", "year"]
 
@@ -21,6 +25,8 @@ TIER_PROFILE_LIMITS = {
     "Whipped Cream": 2,
     "Heavy Cream": 4,
 }
+
+########### User Data Functions ###########
 
 def load_user_data(email):
     with open(CSV_PATH, newline="") as f:
@@ -46,6 +52,8 @@ def save_user_data(user_data):
         writer.writeheader()
         writer.writerows(rows)
 
+########### TOTP 2FA ###########
+
 def save_totp_secret(email, secret):
     rows = []
     with open(CSV_PATH, newline="") as f:
@@ -61,6 +69,8 @@ def save_totp_secret(email, secret):
         writer.writeheader()
         writer.writerows(rows)
 
+########### Profile Functions ###########
+
 def load_profiles(email):
     profiles = []
     with open(PROFILES_PATH, newline="") as f:
@@ -74,6 +84,26 @@ def add_profile(email, profile_name):
     with open(PROFILES_PATH, "a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([email, profile_name])
+
+########### Watchlist Functions ###########
+
+def _find_content(title, type_label, year):
+    for items in CATEGORIES.values():
+        for c in items:
+            if c.get_title() == title and c.get_type_label() == type_label and str(c.get_year()) == str(year):
+                return c
+    return None
+
+def get_watchlist(email, profile_name):
+    result = []
+    with open(WATCHLIST_PATH, newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            if row["email"] == email and row["profile_name"] == profile_name:
+                c = _find_content(row["title"], row["type_label"], row["year"])
+                if c:
+                    result.append(c)
+    return result
 
 def is_in_watchlist(email, profile_name, content):
     with open(WATCHLIST_PATH, newline="") as f:
