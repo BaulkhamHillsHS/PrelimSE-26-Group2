@@ -1,11 +1,14 @@
 import customtkinter as ctk
 from data.content import Content
+from data.data_control import add_to_watchlist, remove_from_watchlist, is_in_watchlist
 
 
 class PlaybackFrame(ctk.CTkFrame):
-    def __init__(self, parent, content, on_back=None):
+    def __init__(self, parent, content, email, profile_name, on_back=None):
         super().__init__(parent, fg_color="#000000")
         self._content = content
+        self._email = email
+        self._profile_name = profile_name
         self.on_back = on_back
 
         self.grid_columnconfigure(0, weight=1)
@@ -53,4 +56,25 @@ class PlaybackFrame(ctk.CTkFrame):
                       corner_radius=25, fg_color="#e50914",
                       hover_color="#ff0f1f", text_color="white",
                       font=("Segoe UI", 16, "bold")).pack(pady=(35, 0))
-
+        
+        self._watchlist_btn = ctk.CTkButton(
+            center, width=200, height=36,
+            corner_radius=18,
+            font=("Segoe UI", 13, "bold"),
+            command=self._toggle_watchlist,
+        )
+        self._watchlist_btn.pack(pady=(0, 0))
+        self._update_watchlist_button()
+    
+    def _update_watchlist_button(self):
+        if is_in_watchlist(self._email, self._profile_name, self._content):
+            self._watchlist_btn.configure(text="- Remove from Watchlist",fg_color="#333333", hover_color="#555555")
+        else:
+            self._watchlist_btn.configure(text="+ Add to Watchlist",fg_color="#2d6a4f",hover_color="#40916c")
+    
+    def _toggle_watchlist(self):
+        if is_in_watchlist(self._email, self._profile_name, self._content):
+            remove_from_watchlist(self._email, self._profile_name, self._content)
+        else:
+            add_to_watchlist(self._email, self._profile_name, self._content)
+        self._update_watchlist_button()

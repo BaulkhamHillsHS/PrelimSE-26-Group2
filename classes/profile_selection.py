@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from assets import colours
-from classes.data_control import load_user_data, save_user_data, load_profiles, add_profile, TIER_PROFILE_LIMITS
+from data.data_control import load_user_data, save_user_data, load_profiles, add_profile, TIER_PROFILE_LIMITS
 
 class ProfileSelectionFrame(ctk.CTkFrame):
     def __init__(self, parent, email, on_profile_selected=None, on_sign_out=None, on_back=None):  # Created a function similarly to the login_frame py and subscriptio_frame py to handle profile selection

@@ -4,7 +4,7 @@ import pyotp
 import qrcode
 from io import BytesIO
 from PIL import Image
-from classes.data_control import load_user_data, save_user_data, CSV_PATH
+from data.data_control import load_user_data, save_user_data, CSV_PATH
 
 # Authenticator (TOTP 2FA)
 # Testing flag: set to True to skip authenticator verification entirely
