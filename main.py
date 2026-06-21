@@ -84,10 +84,9 @@ class App(ctk.CTk):
     def _show_playback(self, content):
         if self.current_frame:
             self.current_frame.destroy()
-        self.current_frame = PlaybackFrame(
-            self, content,
-            on_back=self._show_main_menu,
-        )
+        self.current_frame = PlaybackFrame(self, content, 
+                                           self._email, self._profile_name,
+                                           on_back=self._show_main_menu)
         self.current_frame.grid(row=0, column=0, sticky="nsew")
          
     
