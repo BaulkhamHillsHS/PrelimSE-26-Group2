@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from data.content import Content
-from classes.data_control import add_to_watchlist, remove_from_watchlist, is_in_watchlist
+from data.data_control import add_to_watchlist, remove_from_watchlist, is_in_watchlist
 
 
 class PlaybackFrame(ctk.CTkFrame):

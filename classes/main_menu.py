@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from assets import colours
 from data.content import CATEGORIES
-from classes.data_control import get_watchlist, remove_from_watchlist
+from data.data_control import get_watchlist, remove_from_watchlist
 
 class MainMenuFrame(ctk.CTkFrame):
     def __init__(self, parent, email, profile_name, on_sign_out=None, on_settings=None, on_play=None):

@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from assets import colours
-from classes.data_control import load_user_data, save_user_data, TIER_INFO, TIERS
+from data.data_control import load_user_data, save_user_data, TIER_INFO, TIERS
 
 class SubscriptionFrame(ctk.CTkFrame):
     def __init__(self, parent, email, on_back=None):
